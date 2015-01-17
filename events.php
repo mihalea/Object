@@ -18,8 +18,8 @@
 			$manager = new EventManager();
 			
 			if($manager->errors)
-			foreach($manager->errors as $error)
-			echo $error;
+				foreach($manager->errors as $error)
+					echo $error;
 			
 			if ($login->isLogged()) { 
 				

@@ -41,7 +41,7 @@
 									</div>
 								</div>
 								
-								<input type="submit" name="group" id="submit" class="btn btn-success pull-right"></input>
+								<input type="submit" name="newGroup" id="submit" class="btn btn-success pull-right"></input>
 								<div class="clearfix"></div>
 							</form>
 						</div>
@@ -72,15 +72,15 @@
 							</div>
 					</div>
 					<div class="row">
-						<div class="col-xs-9">
+						<div class="col-sm-9">
 							<div class="collapse" id="newMessageCollapse">						
 								<form id="addEvent" method="POST">
 									<div class="form-group">
-										<label for="inputPost" class="control-label">Comment: </label>
+										<label for="inputPost" class="control-label">Post: </label>
 										<textarea rows="4" id="inputPost" name="post" class="form-control"/></textarea>
 									</div>
 									
-									<input type="submit" name="event" id="submit" class="btn btn-success pull-right"></input>
+									<input type="submit" name="newPost" id="submit" class="btn btn-success pull-right"></input>
 									
 									<div class="clearfix"></div>
 								</form>
@@ -88,10 +88,42 @@
 								<hr />
 							</div>
 							
-							<p> Main text </p>
+							<?php
+								if(isset($_GET["error"]) AND $_GET["error"] == "post") {
+									echo '<div class="alert alert-danger""><p>Error! Failed to post your message.</p></div>';
+								}
+							
+								$posts = $group->getPosts();
+								
+								if(is_array($posts) AND count($posts) > 0) {
+									foreach($posts as $post) {
+										echo '<div class="panel panel-default post"><div class="panel-body">';
+										echo $post->text;
+										echo '<hr /><small><span class="glyphicon glyphicon-user">&nbsp;</span>'
+											. $post->user->name . '</small>';
+										echo '<div class="pull-right"><small><span class="glyphicon glyphicon-calendar">&nbsp;</span>'
+											. $post->timeDifference() . '</small></div>';
+										echo '</div></div>';
+									}
+								}
+							?>
 						</div>
-						<div class="col-xs-3">
-							<p> Sidetext </p>
+						<div class="col-sm-3">
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									Members
+								</div>
+								<div class="panel-body">
+								<?php
+									$members = $group->getRandomMembers(5);
+									
+									$count = count($members);
+									for ($i = 0 ; $i<$count ; $i++) {
+										echo '<a href="#">' . $members[$i]->name . '</a><br />';
+									}
+								?>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

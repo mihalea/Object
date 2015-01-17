@@ -6,6 +6,11 @@
   top: 75px;
 }
 
+.post {
+  padding:15px;
+  padding-bottom: 0px;
+}
+
 #register {
   position:relative;
   top: 5px;
