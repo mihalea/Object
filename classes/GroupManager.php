@@ -6,64 +6,78 @@ class GroupManager {
 
 	public $id;
 	public $group;
+	public $errors = array();
 
 	public function __construct()
 	{
-		if(isset($_POST["name"]))
-			$this->createGroup();
+		if(isset($_POST["name"])) {
+			if ($this->createGroup() == true) {
+				header("Location: groups.php");
+			} else {
+				#header("Location: groups.php?error=create");
+			}
+		}
 	}
 	
 	public function createGroup()
 	{
 		if(empty($_POST["name"]))
-			die("Empty post var: name");
+			$this->errors[] = "Empty post var: name";
 		elseif(!isset($_SESSION["id"]) OR empty($_SESSION["id"]))
-			die("Empty or not set user id");
+			$this->errors[] = "Empty or not set user id";
 		else {
 			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-			if($conn->connect_errno)
-				die("Connection failed!");
+			if($conn->connect_error) {
+				$this->errors[] = "Connection failed!: " . $conn->connect_error;
+				return false;
+			}
 			
-			$query = "INSERT INTO groups (name, user_id)
-					  VALUES (?, ?);
-					  SELECT LAST_INSERT_ID()";
-			$stmt = $conn->prepare($query);
-			if(false === $stmt)
-				die("prepare() failed");
+			$stmt = $conn->prepare("INSERT INTO groups (name, user_id) VALUES(?, ?);");
+			if(false === $stmt) {
+				$this->errors[] = "Prepare failed " . $conn->error;
+				return false;
+			}
 				
 			$name = $_POST["name"];
 			$user_id = $_SESSION["id"];
 				
-			$rc = $stmt->bind_param("si", $name, $user_id);
-			if(false === $rc)
-				die("bind_param() failed");
+			$ok = $stmt->bind_param("si", $name, $user_id);
+			if(false === $ok) {
+				$this->errors[] = "bind_param() failed";
+				return false;
+			}
 				
-			$created = $stmt->execute();
-			if(false === $created)
-				die("execute() failed");
+			$ok = $stmt->execute();
+			if(false === $ok) {
+				$this->errors[] = "execute() failed";
+				return false;
+			}
 				
-			$rc = $stmt->bind_result($group_id);
-			if(false === $rc)
-				die("bind_result() failed");
-		
-			$query = "INSERT INTO membership (user_id, group_id, flag)
-					  VALUES (?, ?, ?);";
-			$stmt = $conn->prepare($query);
-			if(false === $stmt)
-				die("prepare() failed");
-				
-			$flag = 'a';
+			$stmt = $conn->prepare("INSERT INTO membership (user_id, group_id, flag)
+									VALUES (?, LAST_INSERT_ID(), ?);");
+			if(false === $stmt) {
+				$this->errors[] = "Failed to connect to db: " . $conn->connect_error;
+				return false;
+			}
 			
-			$rc = $stmt->bind_param("iis", $user_id, $group_od, $flag);
-			if(false === $rc)
-				die("bind_param() failed");
-				
-			$added = $stmt->execute();
-			if(false === $added)
-				die("execute() failed");
-				
-			$GLOBAL["ok"] = 1;
+			$flag = "a";
+			$ok = $stmt->bind_param("is", $user_id, $flag);
+			if(false === $ok) {
+				$this->errors[] = "Failed to prepare statement";
+				return false;
+			}
+			
+			$ok = $stmt->execute();
+			if(false === $ok) {
+				$this->errors[] = "Failed to execute";
+				return false;
+			}
+			
+			return true;
+			
 		}
+		
+		return false;
 	}
 	
 	public function getGroups()
@@ -128,6 +142,7 @@ class GroupManager {
 class Group {
 	private $id;
 	private $name;
+	private $members = array();
 	
 	public function __construct($id)
 	{

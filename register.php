@@ -3,14 +3,14 @@ require_once("classes/Register.php");
 
 $register = new Register();
 
-if($register->messages)
-	foreach($register->messages as $message)
-		echo $message;
+if($register->errors)
+	foreach($register->errors as $error)
+		echo $error;
 ?>
 <html>
 
 <head>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
 	<title>Register</title>
 </head>
@@ -36,6 +36,12 @@ if($register->messages)
 			<input type="submit" name="register" value="Register" class="btn btn-lg btn-primary btn-block" />
 
 		</form>
+		
+		<?php 
+				if (isset($_GET["error"]))
+					echo '<div class="alert alert-danger" style="position:relative; top:20px;"><p>Failed to register</p></div>';
+			?>
+		
 	</div>
 	
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

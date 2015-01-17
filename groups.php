@@ -21,7 +21,7 @@
 			if ($login->isLogged()) { 
 			include("views/navbar.php"); 
 			
-				if(count($_GET) == 0) { ?>
+				if(!isset($_GET["id"])) { ?>
 				
 				<div class="container">
 					<div class="page-header">
@@ -48,23 +48,10 @@
 					</div>		
 
 					<?php 
-					if(isset($GLOBALS["ok"]))
-					{
-						if($GLOBALS["ok"] == 1) { ?>
-						
-						<div class="alert alert-success">
-							<p> Group successfully created. </p>
-						</div>
-						
-						<?php } else { ?>
-					
-						<div class="alert alert-error">
-							<p> Failed to create group. </p>
-						</div>
-					
-						<?php }
-					} 
-					
+					if (isset($_GET["error"]) AND $_GET["error"] == "create") {
+						echo '<div class="alert alert-danger""><p>Failed to create new group</p></div>';
+					}
+	
 					$manager->getGroups();
 					?>
 				</div>

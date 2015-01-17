@@ -16,6 +16,10 @@ require_once("classes/Login.php");
 
 $login = new Login();
 
+if($login->errors)
+	foreach($login->errors as $error)
+		echo $error;
+
 if ($login->isLogged()) { 
 include("views/navbar.php");?>
 
@@ -28,10 +32,10 @@ include("views/navbar.php");?>
 				<h2 class="form-signin-heading">Object <small> beta </small> </h2>
 			
 				<label for="username" class="sr-only">Username: </label>
-				<input id="username" name="u" type="text"  class="form-control top" placeholder="Username" required />
+				<input id="username" name="u" type="text"  class="form-control top" placeholder="Username" pattern="[a-zA-Z0-9]{6,64}" required />
 				
 				<label for="password" class="sr-only">Password: </label>
-				<input id="password" name="p" type="password" class="form-control bottom" placeholder="Password" required />
+				<input id="password" name="p" type="password" class="form-control bottom" placeholder="Password" pattern=".{6,64}" required />
 				
 				
 				<input type="submit" name="login" value="Log in" class="btn btn-lg btn-primary btn-block" />
@@ -39,7 +43,18 @@ include("views/navbar.php");?>
 			</form>
 		
 			<a href="register.php" id="register">Register</a>
+			
+			<?php 
+				if (isset($_GET["error"]))
+					echo '<div class="alert alert-danger" style="position:relative; top:20px;"><p>Failed to login</p></div>';
+				elseif (isset($_GET["register"]))
+					echo '<div class="alert alert-success" style="position:relative; top:20px;"><p>Successfully registered</p></div>';
+				elseif(isset($_POST["p"]))
+					echo password
+			?>
 		</div>
+		
+		
 	
 		
 	

@@ -4,8 +4,7 @@ require_once("config/db.php");
 
 class Login {
 	
-	private $connection = null;
-	private $errors = array();
+	public $errors = array();
 
 	public function __construct()
 	{
@@ -27,21 +26,54 @@ class Login {
 		{
 			$connection = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			
-			if($connection->connect_error) 
-				die("Connection failed!");
+			if($connection->connect_error) {
+				$this->errors[] = $connection->connect_error;
+				return;
+			}
 				
 			$stmt = $connection->prepare("SELECT user_id, username, email, password
 										  FROM members
 										  WHERE username = ? OR email = ?
 										  LIMIT 1;");
+			if(false === $stmt)
+			{
+				$this->errors[] = "Failed to prepare statement at login: " . $connection->connect_error;
+				return;
+			}
+			
 			
 			$uname = $_POST["u"];
 			
-			$stmt->bind_param("ii", $uname, $uname);
-			$stmt->execute();
+			$ok = $stmt->bind_param("ss", $uname, $uname);
+			if(false === $ok)
+			{
+				$this->errors[] = "Failed to bind params at login";
+				return;
+			}
 			
-			$stmt->bind_result($id, $username, $email, $password);
-			$stmt->fetch();
+			$ok = $stmt->execute();
+			if(false === $ok)
+			{
+				$this->errors[] = "Failed to execute at login";
+				return;
+			}
+			
+			$ok = $stmt->bind_result($id, $username, $email, $password);
+			if(false === $ok)
+			{
+				$this->errors[] = "Failed to bind result at login";
+				return;
+			}
+			
+			$ok = $stmt->fetch();
+			if(false === $ok)
+			{
+				$this->errors[] = "Failed to fetch at login";
+				return;
+			}
+			
+			$stmt->close();
+			$connection->close();
 			
 			if(password_verify($_POST["p"], $password))
 			{
@@ -49,11 +81,10 @@ class Login {
 				$_SESSION["email"] = $email;
 				$_SESSION["id"] = $id;
 				$_SESSION["isLogged"] = 1;
+				header('Location: index.php');
 			}
-			
-			
-			$stmt->close();
-			$connection->close();
+			else
+				header('Location: index.php?error');
 		}
 	}
 	
@@ -61,6 +92,7 @@ class Login {
 	{
 		$_SESSION= array();
 		session_destroy();
+		header('Location: index.php');
 	}
 	
 	public function isLogged()
