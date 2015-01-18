@@ -1,7 +1,5 @@
 <?php
 
-require_once("config/db.php");
-
 class Login {
 	
 	public $errors = array();

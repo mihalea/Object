@@ -1,5 +1,7 @@
 <?php
-$page = basename($_SERVER['PHP_SELF']) ?>
+$page = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
+$root = "//127.0.0.1/test/";
+?>
 
 <nav class="navbar navbar-default">
 	<div class="container">
@@ -11,24 +13,24 @@ $page = basename($_SERVER['PHP_SELF']) ?>
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="index.php">
+			<a class="navbar-brand" href=<?=$root?>>
 				<span class="glyphicon glyphicon-home" aria-hidden="true"/>
 			</a>
 		</div>
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse" id="navbar">
 			<ul class="nav navbar-nav">
-				<li <?php if ($page == 'index.php') echo ' class="active"'?>>
-					<a href="index.php">Frontpage</a>
+				<li <?php if ($page == $root . "index.php") echo ' class="active"'?>>
+					<a href=<?=$root?>>Frontpage</a>
 				</li>
-				<li <?php if ($page == 'groups.php') echo ' class="active"'?>>
-					<a href="groups.php">Groups</a>
+				<li <?php if (preg_match('/groups/', $page)) echo ' class="active"'?>>
+					<a href=<?=$root, "groups"?>>Groups</a>
 				</li>
-				<li <?php if ($page == 'events.php') echo ' class="active"'?>>
-					<a href="events.php">Events</a>
+				<li <?php if (preg_match('/events/', $page)) echo ' class="active"'?>>
+					<a href=<?=$root, "events"?>>Events</a>
 				</li>
-				<li <?php if ($page == 'grades.php') echo ' class="active"'?>>
-					<a href="grades.php">Grades</a>
+				<li <?php if (preg_match('/grades/', $page)) echo ' class="active"'?>>
+					<a href=<?=$root, "grades"?>>Grades</a>
 				</li>
 			</ul>
 			

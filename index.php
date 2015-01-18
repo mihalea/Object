@@ -27,7 +27,7 @@ include("views/navbar.php");?>
 	
 	
 		<div class="container form-div">
-			<form method="post" action="index.php" class="form-signin">
+			<form method="post" class="form-signin">
 			
 				<h2 class="form-signin-heading">Object <small> beta </small> </h2>
 			

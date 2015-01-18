@@ -1,14 +1,12 @@
 <?php
 	
-	require_once("config/db.php");
-	
 	class GroupManager {
 		
 		public $errors = array();
 		
 		public function __construct()
 		{
-			$url = "groups.php?";
+			$url = SITE_LINK . "groups?";
 			if(isset($_GET["id"]) && !empty($_GET["id"]))
 				$url = $url . "id=" . $_GET["id"];
 		
@@ -22,7 +20,7 @@
 				if($this->createPost() == true) {
 					header("Location: " . $url);
 				} else {
-					#header("Location: " . $url . "&error=post");
+					header("Location: " . $url . "&error=post");
 				}
 			}
 		}

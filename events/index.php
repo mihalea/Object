@@ -2,17 +2,16 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<link rel="stylesheet" href="css/bootstrap.min.css">
-		<link rel="stylesheet" href="css/styles.css">
-		<link rel="stylesheet" href="css/datepicker.css">
-		<base href="http://127.0.0.1/test/" />
+		<link rel="stylesheet" href="../css/bootstrap.min.css">
+		<link rel="stylesheet" href="../css/styles.css">
+		<link rel="stylesheet" href="../css/datepicker.css">
 		<title> Events </title>
 	</head>
 	<body>
 		<?php
-			require_once("config/db.php");
-			require_once("classes/Login.php");
-			require_once("classes/EventManager.php");
+			require_once("../config/db.php");
+			require_once("../classes/Login.php");
+			require_once("../classes/EventManager.php");
 			
 			$login = new Login();
 			$manager = new EventManager();
@@ -23,7 +22,7 @@
 			
 			if ($login->isLogged()) { 
 				
-			include("views/navbar.php"); ?>
+			include("../views/navbar.php"); ?>
 			
 			<div class="container">
 				<div class="page-header">
@@ -94,8 +93,8 @@
 		NOT LOGGED IN!
 	<?php } ?>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<script src="js/bootstrap-datepicker.js"></script>
+	<script src="../js/bootstrap.min.js"></script>
+	<script src="../js/bootstrap-datepicker.js"></script>
 	
 	<script type="text/javascript">
 		$('#inputDate').datepicker({

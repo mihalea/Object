@@ -2,15 +2,17 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<link rel="stylesheet" href="css/bootstrap.min.css">
-		<link rel="stylesheet" href="css/styles.css">
+		<link rel="stylesheet" href="../css/bootstrap.min.css">
+		<link rel="stylesheet" href="../css/styles.css">
 		<title> Groups </title>
 	</head>
 	<body>
 		<?php
-			require_once("config/db.php");
-			require_once("classes/Login.php");
-			require_once("classes/GroupManager.php");
+			
+			require_once("../config/var.php");
+			require_once("../config/db.php");
+			require_once("../classes/Login.php");
+			require_once("../classes/GroupManager.php");
 			
 			$login = new Login();
 			$manager = new GroupManager();
@@ -19,7 +21,7 @@
 				$group = new Group($_GET["id"]);
 			
 			if ($login->isLogged()) { 
-			include("views/navbar.php"); 
+			include("../views/navbar.php"); 
 			
 				if(!isset($_GET["id"])) { ?>
 				
@@ -109,20 +111,12 @@
 							?>
 						</div>
 						<div class="col-sm-3">
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									Members
-								</div>
-								<div class="panel-body">
-								<?php
-									$members = $group->getRandomMembers(5);
-									
-									$count = count($members);
-									for ($i = 0 ; $i<$count ; $i++) {
-										echo '<a href="#">' . $members[$i]->name . '</a><br />';
-									}
-								?>
-								</div>
+
+							<div class="list-group">
+								<span class="list-group-item list-heading">Dashboard</span>
+								<a href="#" class="list-group-item">Schedule</a>
+								<a href="#" class="list-group-item">Materials</a>
+								<a href="#" class="list-group-item">Members</a>
 							</div>
 						</div>
 					</div>
@@ -134,6 +128,6 @@
 		NOT LOGGED IN!
 		<?php } ?>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script src="js/bootstrap.min.js"></script>
+		<script src="../js/bootstrap.min.js"></script>
 	</body>
 </html>

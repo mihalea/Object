@@ -1,72 +1,77 @@
 .form-div {
-  max-width: 400px;
-  padding: 15px;
-  margin: 0 auto;
-  position:relative;
-  top: 75px;
+	max-width: 400px;
+	padding: 15px;
+	margin: 0 auto;
+	position:relative;
+	top: 75px;
 }
 
 .post {
-  padding:15px;
-  padding-bottom: 0px;
+	padding:15px;
+	padding-bottom: 0px;
+}
+
+.list-heading {
+	background-color:#A6373F;
+	color: #ecf0f1;
 }
 
 #register {
-  position:relative;
-  top: 5px;
+	position:relative;
+	top: 5px;
 }
 
 #eventTable {
-  table-layout:fixed;
+	table-layout:fixed;
 }
 
 table#eventTable td {
-  word-wrap:break-word;
+	word-wrap:break-word;
 }
 
 td.removeCol {
-  width:50px;
-  overflow:hidden;
-  display: inline-block;
-  white-space: nowrap;
+	width:50px;
+	overflow:hidden;
+	display: inline-block;
+	white-space: nowrap;
 }
 
 .form-signin .form-control {
-  position: relative;
-  height: auto;
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
-  padding: 15px;
-  font-size: 18px;
+	position: relative;
+	height: auto;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 15px;
+	font-size: 18px;
 }
 
 input.top {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
+	margin-bottom: -1px;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
 }
 
 input.middle {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+	margin-bottom: -1px;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
 }
 
 input.bottom{
-  margin-bottom: 15px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+	margin-bottom: 15px;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
 }
 
 .form-signin input[type="submit"] {
-  background-color:#A6373F;
+	background-color:#A6373F;
 }
- 
+
 .form-signin input[type="submit"]:active {
-  background-color:#7C151D;
+	background-color:#7C151D;
 }
 .navbar-default {
 	background-color: #7c151d;
