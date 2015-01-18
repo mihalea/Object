@@ -2,9 +2,13 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<link rel="stylesheet" href="../css/bootstrap.min.css">
+		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 		<link rel="stylesheet" href="../css/styles.css">
 		<link rel="stylesheet" href="../css/datepicker.css">
+		
+		<base href="//localhost/test/">
+		
 		<title> Events </title>
 	</head>
 	<body>
@@ -93,8 +97,8 @@
 		NOT LOGGED IN!
 	<?php } ?>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-	<script src="../js/bootstrap.min.js"></script>
-	<script src="../js/bootstrap-datepicker.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<script src="js/bootstrap-datepicker.js"></script>
 	
 	<script type="text/javascript">
 		$('#inputDate').datepicker({

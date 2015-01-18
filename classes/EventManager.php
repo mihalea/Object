@@ -1,4 +1,6 @@
 <?php
+	$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/config/site.php");
+	require_once($path);
 	
 	class EventManager
 	{
@@ -7,20 +9,21 @@
 		
 		public function __construct()
 		{
+			$url = SITE_ROOT . "events";
 			if(isset($_POST["event"])) {			
 				if($this->addEvent() == true) {
-					header('Location: events.php');
+					header('Location: ' . $url);
 				}
 				else {
-					header('Location: events.php?error=add');
+					header('Location: ' . $url . '?error=add');
 				}
 			}
 			elseif(isset($_POST["eventID"])) {
 				if($this->removeEvent() == true) {
-					header('Location: events.php');
+					header('Location: ' . $url);
 				}
 				else {
-					header('Location: events.php?error=rem');
+					header('Location: ' . $url . 'error=rem');
 				}
 			}
 		}

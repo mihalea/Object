@@ -1,4 +1,6 @@
 <?php
+	$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/config/site.php");
+	require_once($path);
 	
 	class GroupManager {
 		
@@ -6,20 +8,20 @@
 		
 		public function __construct()
 		{
-			$url = SITE_LINK . "groups?";
+			$url = SITE_ROOT . "groups?";
 			if(isset($_GET["id"]) && !empty($_GET["id"]))
-				$url = $url . "id=" . $_GET["id"];
-		
+			$url = $url . "id=" . $_GET["id"];
+			
 			if(isset($_POST["newGroup"])) {
 				if ($this->createGroup() == true) {
 					header("Location: " . $url);
 					} else {
 					header("Location: " . $url . "&error=create");
 				}
-			} elseif (isset($_POST["newPost"])) {
+				} elseif (isset($_POST["newPost"])) {
 				if($this->createPost() == true) {
 					header("Location: " . $url);
-				} else {
+					} else {
 					header("Location: " . $url . "&error=post");
 				}
 			}
@@ -29,9 +31,9 @@
 		{
 			if(!isset($_POST["name"]) OR empty($_POST["name"])) {
 				$this->errors[] = "Empty post var: name";
-			} elseif(!isset($_SESSION["id"]) OR empty($_SESSION["id"])) {
+				} elseif(!isset($_SESSION["id"]) OR empty($_SESSION["id"])) {
 				$this->errors[] = "Empty or not set user id";
-			} else {
+				} else {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 				if($conn->connect_error) {
 					$this->errors[] = "Connection failed!: " . $conn->connect_error;
@@ -90,11 +92,11 @@
 		{
 			if(!isset($_POST["post"]) OR empty($_POST["post"])) {
 				$this->errors[] = "Empty post var: text";
-			} elseif(!isset($_GET["id"]) OR empty($_GET["id"])) {
+				} elseif(!isset($_GET["id"]) OR empty($_GET["id"])) {
 				$this->errors[] = "Group not selected";
-			} elseif(!isset($_SESSION["id"]) OR empty($_SESSION["id"])) {
+				} elseif(!isset($_SESSION["id"]) OR empty($_SESSION["id"])) {
 				$this->errors[] = "Empty or not set user id";
-			} else {
+				} else {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 				if($conn->connect_error) {
 					$this->errors[] = "Connection failed!: " . $conn->connect_error;
@@ -102,7 +104,7 @@
 				}
 				
 				$stmt = $conn->prepare("INSERT INTO gposts (group_id, user_id, text, date) 
-					VALUES(?, ?, ?, NOW());");
+				VALUES(?, ?, ?, NOW());");
 				if(false === $stmt) {
 					$this->errors[] = "Prepare failed " . $conn->error;
 					return false;
@@ -169,7 +171,7 @@
 				echo '<div class="list-group">';
 				while($stmt->fetch())
 				{
-					echo '<a href="groups.php?id=' . $group_id . '" class="list-group-item">';
+					echo '<a href="groups?id=' . $group_id . '" class="list-group-item">';
 					echo $name;		
 					
 					if($flag == 'a')
@@ -283,19 +285,19 @@
 			ORDER BY gposts.date DESC;";
 			$stmt = $conn->prepare($query);
 			if(false === $stmt)
-				die("Prepare failed");
+			die("Prepare failed");
 			
 			$ok = $stmt->bind_param("i", $this->id);
 			if(false === $ok)
-				die("bind_param failed");
+			die("bind_param failed");
 			
 			$ok = $stmt->execute();
 			if(false === $ok)
-				die("Execute failed");
+			die("Execute failed");
 			
 			$ok = $stmt->bind_result($user_id, $username, $text, $date);
 			if(false === $ok)
-				die("bind_result failed");
+			die("bind_result failed");
 			
 			while($stmt->fetch())
 			{
@@ -360,23 +362,23 @@
 				$time = round($time);
 				
 				if($time == 1)
-					return $time . ' minute ago';
+				return $time . ' minute ago';
 				else
-					return $time . ' minutes ago';
-			} else {
+				return $time . ' minutes ago';
+				} else {
 				$time = $time / 60;
 				if ( $time < 24 ) {
 					$time = round($time);
 					if($time == 1)
-						return $time . ' hour ago';
+					return $time . ' hour ago';
 					else
-						return $time . ' hours ago';
-				} else {
+					return $time . ' hours ago';
+					} else {
 					$time = round($time / 24);
-					if($days == 1)
-						return $time . ' day ago';
+					if($time == 1)
+					return $time . ' day ago';
 					else
-						return $time . ' days ago';
+					return $time . ' days ago';
 				}
 			}
 		}

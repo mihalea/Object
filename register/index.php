@@ -10,9 +10,14 @@ if($register->errors)
 <html>
 
 <head>
-	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<meta charset="utf-8">
+	
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
+	
 	<title>Register</title>
+	
+	<base href="//localhost/test/">
 </head>
 
 <body>
@@ -45,6 +50,6 @@ if($register->errors)
 	</div>
 	
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script src="js/bootstrap.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 <body>
 </html>
