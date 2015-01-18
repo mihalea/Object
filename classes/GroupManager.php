@@ -285,19 +285,19 @@
 			ORDER BY gposts.date DESC;";
 			$stmt = $conn->prepare($query);
 			if(false === $stmt)
-			die("Prepare failed");
+				die("Prepare failed");
 			
 			$ok = $stmt->bind_param("i", $this->id);
 			if(false === $ok)
-			die("bind_param failed");
+				die("bind_param failed");
 			
 			$ok = $stmt->execute();
 			if(false === $ok)
-			die("Execute failed");
+				die("Execute failed");
 			
 			$ok = $stmt->bind_result($user_id, $username, $text, $date);
 			if(false === $ok)
-			die("bind_result failed");
+				die("bind_result failed");
 			
 			while($stmt->fetch())
 			{
@@ -342,40 +342,44 @@
 	class Post {
 		public $user;
 		public $text;
-		public $date;
+		public $datetime;
 		
-		public function __construct($user, $text, $date) {
+		public function __construct($user, $text, $datetime) {
 			$this->user = $user;
 			$this->text = $text;
-			$this->date = $date;
+			$this->datetime = $datetime;
 		}
 		
 		public function timeDifference() {
 			$timeNow = time() + (2 * 60 * 60);
-			$timePost = strtotime($this->date);
-			
-			$seconds = $timeNow - $timePost;
+			$timePost = strtotime($this->datetime);
 			
 			
-			if( ($minutes = $seconds / 60) < 60 ) {
-				$minutes = round($minutes);
+			$time = $timeNow - $timePost;
+			
+			$time = $time / 60; #minutes
+			if( $time < 60 ) {
+				$time = round($time);
 				
-				if($minutes == 1)
-				return $minutes . ' minute ago';
+				if($time == 1)
+					return $time . ' minute ago';
 				else
-				return $minutes . ' minutes ago';
-				} else if ( $hours = $minutes / 60 < 24 ) {
-				$hours = round($hours);
-				if($hours == 1)
-				return $hours . ' hour ago';
-				else
-				return $hours . ' hours ago';
+					return $time . ' minutes ago';
+			} else {
+				$time = $time / 60;
+				if ( $time < 24 ) {
+					$time = round($time);
+					if($time == 1)
+						return $time . ' hour ago';
+					else
+						return $time . ' hours ago';
 				} else {
-				$days = round($hours / 24);
-				if($days == 1)
-				return $days . ' day ago';
-				else
-				return $days . ' days ago';
+					$time = round($time / 24);
+					if($days == 1)
+						return $time . ' day ago';
+					else
+						return $time . ' days ago';
+				}
 			}
 		}
 	}
