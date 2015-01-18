@@ -1,6 +1,6 @@
 <?php
 $page = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
-$root = "//127.0.0.1/test/";
+$root = "//localhost/test/";
 ?>
 
 <nav class="navbar navbar-default">

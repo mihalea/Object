@@ -18,7 +18,7 @@
 					} else {
 					header("Location: " . $url . "&error=create");
 				}
-				} elseif (isset($_POST["newPost"])) {
+			} elseif (isset($_POST["newPost"])) {
 				if($this->createPost() == true) {
 					header("Location: " . $url);
 					} else {
@@ -103,7 +103,7 @@
 					return false;
 				}
 				
-				$stmt = $conn->prepare("INSERT INTO gposts (group_id, user_id, text, date) 
+				$stmt = $conn->prepare("INSERT INTO g_posts (group_id, user_id, text, date) 
 				VALUES(?, ?, ?, NOW());");
 				if(false === $stmt) {
 					$this->errors[] = "Prepare failed " . $conn->error;
@@ -197,11 +197,26 @@
 		private $name;
 		private $members = array();
 		private $posts = array();
+		private $flag;
+		private $schedule_id;
+		
+		private $conn;
 		
 		public function __construct($id)
 		{
 			$this->id = $id;
-			$this->getData();
+			
+			if(!$this->getData())
+				header('Location: ' . SITE_ROOT . 'groups?error=noAccess');
+			
+			$url = SITE_ROOT . "groups";
+			if(isset($_POST["addClass"])) {
+				if($this->addClass() == true) {
+					header("Location: " . $url . '/schedule.php?id=' . $id);
+					} else {
+					header("Location: " . $url . '/schedule.php?id=' . $id . 'error=addClass');
+				}
+			}
 		}
 		
 		private function getData()
@@ -210,19 +225,59 @@
 			die("Empty id");
 			else
 			{
-				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+				$this->conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 				
-				if($conn->connect_errno)
+				if($this->conn->connect_errno)
 				die("Failed to connect to database");
 				
-				$this->nameQuery($conn);
-				$this->memberQuery($conn);
-				$this->postQuery($conn);
+				if(!$this->hasPrivilege($this->conn))
+					return false;
+					
+				$this->propertiesQuery($this->conn);
+				$this->memberQuery($this->conn);
+				$this->postQuery($this->conn);
+				
+				return true;
+			}
+			
+			return false;
+		}
+		
+		private function hasPrivilege($conn)
+		{
+			if(!isset($_SESSION["id"]) OR empty($_SESSION["id"])) {
+				$this->errors[] = "Empty session id";
+			} else {
+				$query = "SELECT flag
+				FROM membership
+				WHERE group_id = ? AND user_id = ?
+				LIMIT 1;";
+				$stmt = $conn->prepare($query);
+				if(false === $stmt)
+				die("Prepare failed");
+				
+				$ok = $stmt->bind_param("ii", $this->id, $_SESSION["id"]);
+				if(false === $ok)
+				die("bind_param failed");
+				
+				$ok = $stmt->execute();
+				if(false === $ok)
+				die("Execute failed");
+				
+				$stmt->store_result();
+				if($stmt->num_rows == 1) {
+					$stmt->bind_result($flag);
+					$stmt->fetch();
+					$this->flag = $flag;
+					return true;
+				}
+				else
+					return false;
 			}
 		}
 		
-		private function nameQuery($conn) {
-			$query = "SELECT name
+		private function propertiesQuery($conn) {
+			$query = "SELECT name, schedule_id
 			FROM groups
 			WHERE group_id = ?
 			LIMIT 1;";
@@ -238,7 +293,7 @@
 			if(false === $ok)
 			die("Execute failed");
 			
-			$ok = $stmt->bind_result($name);
+			$ok = $stmt->bind_result($name, $schedule_id);
 			if(false === $ok)
 			die("bind_result failed");
 			
@@ -247,6 +302,7 @@
 			die("Execute failed");
 			
 			$this->name = $name;
+			$this->schedule_id = $schedule_id;
 		}
 		
 		private function memberQuery($conn) {
@@ -278,11 +334,11 @@
 		}
 		
 		private function postQuery($conn) {
-			$query = "SELECT gposts.user_id, members.username, gposts.text, gposts.date
-			FROM gposts
-			INNER JOIN members ON gposts.user_id = members.user_id
+			$query = "SELECT g_posts.user_id, members.username, g_posts.text, g_posts.date
+			FROM g_posts
+			INNER JOIN members ON g_posts.user_id = members.user_id
 			WHERE group_id = ?
-			ORDER BY gposts.date DESC;";
+			ORDER BY g_posts.date DESC;";
 			$stmt = $conn->prepare($query);
 			if(false === $stmt)
 			die("Prepare failed");
@@ -305,6 +361,88 @@
 			}
 		}
 		
+		private function addClass()
+		{
+			if(!isset($_POST["startTime"]) OR empty($_POST["startTime"])) {
+				$this->errors[] = "Start time is not set";
+			} elseif(!isset($_POST["endTime"]) OR empty($_POST["endTime"])) {
+				$this->errors[] = "End time is not set";
+			} elseif(!isset($_POST["subject_id"]) OR empty($_POST["subject_id"])) {
+				$this->errors[] = "Subject ID is not set";
+			} elseif(!isset($_POST["day"]) OR empty($_POST["day"])) {
+				$this->errors[] = "Day is not set";
+			} else {					
+				$query = "SELECT schedule_id FROM groups WHERE group_id = ?";
+				$stmt = $this->conn->prepare($query);
+				if(false === $stmt)
+					die("prepare() failed");
+					
+				$code = $stmt->bind_param("i", $this->id);
+				if(false === $code)
+					die("bind_param() failed");
+					
+				$ok = $stmt->execute();
+				if(false === $ok)
+					die("Execute failed");
+					
+				$ok = $stmt->bind_result($schedule_id);
+				if(false === $ok)
+				die("bind_result failed");
+				
+				$stmt->fetch();
+				
+				$stmt->close();
+				if(empty($schedule_id)) {
+					$query = "INSERT INTO schedules (user_id) VALUES (?);";
+					$stmt = $this->conn->prepare($query);
+					if(false === $stmt)
+						die("prepare() failed");
+						
+					$code = $stmt->bind_param("i", $_SESSION["id"]);
+					if(false === $code)
+						die("bind_param() failed");
+						
+					$ok = $stmt->execute();
+					if(false === $ok)
+						die("Execute failed");
+					$stmt->close();
+						
+					$query = "UPDATE groups SET schedule_id = LAST_INSERT_ID() WHERE group_id = ?;";
+					$stmt = $this->conn->prepare($query);
+					if(false === $stmt)
+						die("prepare() failed");
+						
+					$code = $stmt->bind_param("i", $this->id);
+					if(false === $code)
+						die("bind_param() failed");
+						
+					$ok = $stmt->execute();
+					if(false === $ok)
+						die("Execute failed");	
+					$stmt->close();
+						
+					return $this->addClass(); 
+				}
+				
+				$query = "INSERT INTO s_events (schedule_id, subject_id, day, time_start, time_end) VALUES (?, ?, ?, ?, ?);";
+				$stmt = $this->conn->prepare($query);
+				if(false === $stmt)
+					die("prepare(asasas) failed");
+						
+				$code = $stmt->bind_param("iiiss", $schedule_id, $_POST["subject_id"], $_POST["day"], $_POST["startTime"], $_POST["endTime"]);
+				if(false === $code)
+					die("bind_param() failed");
+					
+				$ok = $stmt->execute();
+					if(false === $ok)
+						die("Execute failed");
+				
+				return true;
+			}
+			
+			return false;
+		}
+		
 		public function getRandomMembers($limit) {
 			if($limit > count($this->members))
 			$limit = count($this->members);
@@ -322,9 +460,39 @@
 			return $random;
 		}
 		
+		public function getSubjects()
+		{
+			$query = "SELECT subject_id, name FROM subjects ORDER BY name";
+			$stmt = $this->conn->prepare($query);
+			if(false === $stmt)
+			die("Prepare failed");
+			
+			$ok = $stmt->execute();
+			if(false === $ok)
+			die("Execute failed");
+			
+			$ok = $stmt->bind_result($subject_id, $name);
+			if(false === $ok)
+			die("bind_result failed");
+			
+			$subjects = array();
+			while($stmt->fetch())
+			{
+				$subjects[] = array("id" => $subject_id, "name" => $name);
+			}
+			
+			return $subjects;
+		}
+		
+		public function isMember()
+		{
+			return in_array($_SESSION["uname"], $this->members);
+		}
+		
 		public function getID() { return $this->id; }
 		public function getName() { return $this->name; }
 		public function getPosts() { return $this->posts; }
+		public function getFlag() { return $this->flag; }
 		
 		
 	}

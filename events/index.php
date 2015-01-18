@@ -3,11 +3,13 @@
 	<head>
 		<meta charset="utf-8">
 		
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-		<link rel="stylesheet" href="../css/styles.css">
-		<link rel="stylesheet" href="../css/datepicker.css">
-		
 		<base href="//localhost/test/">
+		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/styles.css">
+		<link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+		
+		
 		
 		<title> Events </title>
 	</head>
@@ -21,8 +23,8 @@
 			$manager = new EventManager();
 			
 			if($manager->errors)
-				foreach($manager->errors as $error)
-					echo $error;
+			foreach($manager->errors as $error)
+			echo $error;
 			
 			if ($login->isLogged()) { 
 				
@@ -41,7 +43,7 @@
 					<div class="collapse" id="addEventCollapse">
 						<br />
 						
-						<form class="form-horizontal" id="addEvent" method="POST">
+					<form class="form-horizontal" id="addEvent" method="POST">
 							<div class="form-group">
 								<label for="inputName" class="col-sm-2 control-label">Name: </label>
 								<div class="col-sm-10">
@@ -52,7 +54,10 @@
 							<div class="form-group">
 								<label for="inputDate" class="col-sm-2 control-label">Date: </label>
 								<div class="col-sm-10">
-									<input type="text" id="inputDate" name="date" value=<?php echo '"' . date("Y-m-d") . '"';?> class="form-control" required/>
+									<div class="input-group date" id="dateTimePicker">
+										<input type="text" id="inputDate" name="date" data-date-format="YYYY-MM-DD"/ class="form-control" required/>
+										<div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+									</div>
 								</div>
 							</div>						
 							
@@ -75,7 +80,7 @@
 			<?php 
 				if (isset($_GET["error"]) AND $_GET["error"] == "add") {
 					echo '<div class="alert alert-danger" style="position:relative; top:20px;"><p>Failed to add the event</p></div>';
-				} elseif (isset($_GET["error"]) AND $_GET["error"] == "rem") {
+					} elseif (isset($_GET["error"]) AND $_GET["error"] == "rem") {
 					echo '<div class="alert alert-danger"><p>Failed to remove the event</p></div>'; 
 				}
 				
@@ -98,11 +103,12 @@
 	<?php } ?>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-	<script src="js/bootstrap-datepicker.js"></script>
+	<script src="js/moment.js"></script>
+	<script src="js/bootstrap-datetimepicker.js"></script>
 	
 	<script type="text/javascript">
-		$('#inputDate').datepicker({
-			format: "yyyy-mm-dd"
+		$('#dateTimePicker').datetimepicker({
+			pickTime: false
 		});
 	</script> 
 	
@@ -112,5 +118,5 @@
 			document.removeForm.submit();
 		}
 	</script> 
-	</body>
+</body>
 </html>

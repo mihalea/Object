@@ -55,7 +55,9 @@
 
 					<?php 
 					if (isset($_GET["error"]) AND $_GET["error"] == "create") {
-						echo '<div class="alert alert-danger""><p>Failed to create new group</p></div>';
+						echo '<div class="alert alert-danger""><p>Error! Failed to create new group</p></div>';
+					} elseif (isset($_GET["error"]) AND $_GET["error"] == "noAccess") {
+						echo '<div class="alert alert-danger""><p>Error! You don\'t have acces to that group.</p></div>';
 					}
 	
 					$manager->getGroups();
