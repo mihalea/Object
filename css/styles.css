@@ -25,6 +25,15 @@ div#panelTitle{
 	color: #ecf0f1;	
 }
 
+a.white-link {
+	color: #ecf0f1;	
+}
+
+input.readOnly {
+	background-color:#A6373F !important;
+	color: #ecf0f1;	
+}
+
 #register {
 	position:relative;
 	top: 5px;

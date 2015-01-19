@@ -2,6 +2,8 @@
 	$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/config/site.php");
 	require_once($path);
 	
+	require_once("../classes/Permissions.php");
+	
 	class GroupManager {
 		
 		public $errors = array();
@@ -10,11 +12,11 @@
 		public function __construct()
 		{
 			$url = "Location: " . SITE_ROOT . "groups?";
-			if(isset($_GET["id"]) && !empty($_GET["id"]))
-				$url = $url . "id=" . $_GET["id"];
+			if(isset($_SESSION["group_id"]) && !empty($_SESSION["group_id"]))
+				$url = $url . "id=" . $_SESSION["group_id"];
 				
 			$this->conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-			if($conn->connect_error) {
+			if($this->conn->connect_error) {
 				die("Connection failed!: " . $conn->connect_error);
 				return false;
 			}
@@ -35,7 +37,7 @@
 				if($this->setID() == true) {
 					header($url);
 					} else {
-					header($url . "&error=set");
+					#header($url . "&error=set");
 				}
 			}
 		}
@@ -145,56 +147,10 @@
 				die("Empty id");
 			else
 			{		
-				if(!$this->hasPrivilege())
+			
+				if(hasGroupFlag('u', $_GET["setid"]) == false)
 					return false;
 					
-				$this->setProperties();
-				$this->setPosts();
-				
-				return true;
-			}
-			
-			return false;
-		}
-		
-		private function hasPrivilege()
-		{
-			if(!isset($_SESSION["id"]) OR empty($_SESSION["id"])) {
-				$this->errors[] = "Empty session id";
-			} else {
-				$query = "SELECT flag
-				FROM membership
-				WHERE group_id = ? AND user_id = ?
-				LIMIT 1;";
-				$stmt = $this->conn->prepare($query);
-				if(false === $stmt)
-				die("Prepare failed");
-				
-				$ok = $stmt->bind_param("ii", $_GET["setid"], $_SESSION["id"]);
-				if(false === $ok)
-				die("bind_param failed");
-				
-				$ok = $stmt->execute();
-				if(false === $ok)
-				die("Execute failed");
-				
-				$stmt->store_result();
-				if($stmt->num_rows == 1) {
-					$stmt->bind_result($flag);
-					$stmt->fetch();
-					$_SESSION["flag"] = $flag;
-					$_SESSION["group_id"] = $_GET["setid"];
-					return true;
-				}
-				else
-					return false;
-			}
-		}
-		
-		private function setProperties() {
-			if(empty($_SESSION["group_id"])) {
-				$this->errors[] = "No group ID set";
-			} else {
 				$query = "SELECT name, schedule_id
 				FROM groups
 				WHERE group_id = ?
@@ -203,7 +159,7 @@
 				if(false === $stmt)
 				die("Prepare failed");
 				
-				$ok = $stmt->bind_param("i", $_SESSION["group_id"]);
+				$ok = $stmt->bind_param("i", $_GET["setid"]);
 				if(false === $ok)
 				die("bind_param failed");
 				
@@ -219,25 +175,30 @@
 				if(false === $ok)
 				die("Execute failed");
 				
+				$_SESSION["group_id"] = $_GET["setid"];
 				$_SESSION["group_name"] = $name;
 				$_SESSION["schedule_id"] = $schedule_id;
+				
+				return true;
 			}
+			
+			return false;
 		}
 		
-		private function getPosts() {
-			if(empty($_SESSION["group_id"])) {
-				$this->errors[] = "No group ID set";
-			} else {
+		public static function getPosts() {
+			if(!empty($_SESSION["group_id"])) {
+				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+			
 				$query = "SELECT g_posts.user_id, members.username, g_posts.text, g_posts.date
 				FROM g_posts
 				INNER JOIN members ON g_posts.user_id = members.user_id
 				WHERE group_id = ?
 				ORDER BY g_posts.date DESC;";
-				$stmt = $this->conn->prepare($query);
+				$stmt = $conn->prepare($query);
 				if(false === $stmt)
 				die("Prepare failed");
 				
-				$ok = $stmt->bind_param("i", $this->id);
+				$ok = $stmt->bind_param("i", $_SESSION["group_id"]);
 				if(false === $ok)
 				die("bind_param failed");
 				
@@ -255,14 +216,17 @@
 					$posts[] = new Post(new User($user_id, $username), $text, $date);
 				}
 				
+				$stmt->close();
+				$conn->close();
+				
 				return $posts;
 			}
 		}
 		
-		private function getMembers() {
-			if(empty($_SESSION["group_id"])) {
-				$this->errors[] = "No group ID set";
-			} else {
+		private static function getMembers() {
+			if(!empty($_SESSION["group_id"])) {
+				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+			
 				$query = "SELECT membership.user_id, members.username
 				FROM membership
 				INNER JOIN members ON membership.user_id = members.user_id
@@ -271,7 +235,7 @@
 				if(false === $stmt)
 				die("Prepare failed");
 				
-				$ok = $stmt->bind_param("i", $this->id);
+				$ok = $stmt->bind_param("i", $_SESSION["group_id"]);
 				if(false === $ok)
 				die("bind_param failed");
 				
@@ -289,61 +253,70 @@
 					$members[] = new User($user_id, $name);
 				}
 				
+				$stmt->close();
+				$conn->close();
+				
 				return $members;
 			}
 		}
 		
-		public function getGroups()
-		{			
-			$query = "SELECT groups.name, groups.group_id, membership.flag
-			FROM groups
-			INNER JOIN membership ON groups.group_id = membership.group_id
-			WHERE membership.user_id = ?";
+		public static function printGroups()
+		{		
+				if(!empty($_SESSION["id"])) {
+				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			
-			$stmt = $conn->prepare($query);
-			
-			if(false === $stmt)
-			die("prepare() failed");
-			
-			$user_id = $_SESSION["id"];
-			$code = $stmt->bind_param("i", $user_id);
-			if(false === $code)
-			die("bind_param() failed");
-			
-			
-			$rows = array();			
-			$success = $stmt->execute();
-			if(false === $success)
-			die("execute() failed");
-			else
-			{
-				$success = $stmt->bind_result($name, $group_id, $flag);
+				$query = "SELECT groups.name, groups.group_id, membership.flag
+				FROM groups
+				INNER JOIN membership ON groups.group_id = membership.group_id
+				WHERE membership.user_id = ?";
 				
+				$stmt = $conn->prepare($query);
+				
+				if(false === $stmt)
+				die("prepare() failed");
+				
+				$user_id = $_SESSION["id"];
+				$code = $stmt->bind_param("i", $user_id);
+				if(false === $code)
+				die("bind_param() failed");
+				
+				
+				$rows = array();			
+				$success = $stmt->execute();
 				if(false === $success)
-				die("bind_result() failed");
-				
-				echo '<div class="list-group">';
-				while($stmt->fetch())
+				die("execute() failed");
+				else
 				{
-					echo '<a href="groups?id=' . $group_id . '" class="list-group-item">';
-					echo $name;		
+					$success = $stmt->bind_result($name, $group_id, $flag);
 					
-					if($flag == 'a')
-					echo '<span class="glyphicon glyphicon-tasks pull-right"></span>';				
-					echo '</a>';
+					if(false === $success)
+					die("bind_result() failed");
 					
+					echo '<div class="list-group">';
+					while($stmt->fetch())
+					{
+						echo '<a href="groups?setid=' . $group_id . '" class="list-group-item">';
+						echo $name;		
+						
+						if($flag == 'a')
+						echo '<span class="glyphicon glyphicon-tasks pull-right"></span>';				
+						echo '</a>';
+						
+					}
+					echo '</div>';
 				}
-				echo '</div>';
+				
+				$stmt->close();
+				$conn->close();
 			}
-			
-			$stmt->close();
-			$conn->close();
 		}
 		
-		public function getSubjects()
+		public static function getSubjects()
 		{
+			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+			
 			$query = "SELECT subject_id, name FROM subjects ORDER BY name";
-			$stmt = $this->conn->prepare($query);
+			$stmt = $conn->prepare($query);
 			if(false === $stmt)
 			die("Prepare failed");
 			
@@ -361,140 +334,11 @@
 				$subjects[] = array("id" => $subject_id, "name" => $name);
 			}
 			
+			$stmt->close();
+			$conn->close();
+			
 			return $subjects;
 		}
-		
-		public function getID()
-		{
-			return $this->id;
-		}
-	}
-	
-	class Group {
-		private $id;
-		private $name;
-		private $members = array();
-		private $posts = array();
-		private $flag;
-		private $schedule_id;
-		
-		private $conn;
-		
-		public function __construct($id)
-		{
-			$this->id = $id;
-			
-			if(!$this->getData())
-				header('Location: ' . SITE_ROOT . 'groups?error=noAccess');
-			
-			$url = SITE_ROOT . "groups";
-			if(isset($_POST["addClass"])) {
-				if($this->addClass() == true) {
-					header("Location: " . $url . '/schedule.php?id=' . $id);
-					} else {
-					header("Location: " . $url . '/schedule.php?id=' . $id . 'error=addClass');
-				}
-			}
-		}
-		
-		
-		
-		private function addClass()
-		{
-			if(!isset($_POST["startTime"]) OR empty($_POST["startTime"])) {
-				$this->errors[] = "Start time is not set";
-			} elseif(!isset($_POST["endTime"]) OR empty($_POST["endTime"])) {
-				$this->errors[] = "End time is not set";
-			} elseif(!isset($_POST["subject_id"]) OR empty($_POST["subject_id"])) {
-				$this->errors[] = "Subject ID is not set";
-			} elseif(!isset($_POST["day"]) OR empty($_POST["day"])) {
-				$this->errors[] = "Day is not set";
-			} else {					
-				$query = "SELECT schedule_id FROM groups WHERE group_id = ?";
-				$stmt = $this->conn->prepare($query);
-				if(false === $stmt)
-					die("prepare() failed");
-					
-				$code = $stmt->bind_param("i", $this->id);
-				if(false === $code)
-					die("bind_param() failed");
-					
-				$ok = $stmt->execute();
-				if(false === $ok)
-					die("Execute failed");
-					
-				$ok = $stmt->bind_result($schedule_id);
-				if(false === $ok)
-				die("bind_result failed");
-				
-				$stmt->fetch();
-				
-				$stmt->close();
-				if(empty($schedule_id)) {
-					$query = "INSERT INTO schedules (user_id) VALUES (?);";
-					$stmt = $this->conn->prepare($query);
-					if(false === $stmt)
-						die("prepare() failed");
-						
-					$code = $stmt->bind_param("i", $_SESSION["id"]);
-					if(false === $code)
-						die("bind_param() failed");
-						
-					$ok = $stmt->execute();
-					if(false === $ok)
-						die("Execute failed");
-					$stmt->close();
-						
-					$query = "UPDATE groups SET schedule_id = LAST_INSERT_ID() WHERE group_id = ?;";
-					$stmt = $this->conn->prepare($query);
-					if(false === $stmt)
-						die("prepare() failed");
-						
-					$code = $stmt->bind_param("i", $this->id);
-					if(false === $code)
-						die("bind_param() failed");
-						
-					$ok = $stmt->execute();
-					if(false === $ok)
-						die("Execute failed");	
-					$stmt->close();
-						
-					return $this->addClass(); 
-				}
-				
-				$query = "INSERT INTO s_events (schedule_id, subject_id, day, time_start, time_end) VALUES (?, ?, ?, ?, ?);";
-				$stmt = $this->conn->prepare($query);
-				if(false === $stmt)
-					die("prepare(asasas) failed");
-						
-				$code = $stmt->bind_param("iiiss", $schedule_id, $_POST["subject_id"], $_POST["day"], $_POST["startTime"], $_POST["endTime"]);
-				if(false === $code)
-					die("bind_param() failed");
-					
-				$ok = $stmt->execute();
-					if(false === $ok)
-						die("Execute failed");
-				
-				return true;
-			}
-			
-			return false;
-		}
-		
-		
-		
-		public function isMember()
-		{
-			return in_array($_SESSION["uname"], $this->members);
-		}
-		
-		public function getID() { return $this->id; }
-		public function getName() { return $this->name; }
-		public function getPosts() { return $this->posts; }
-		public function getFlag() { return $this->flag; }
-		public function getScheduleID() { return $this->schedule_id; }
-		
-		
 	}
 	
 	class User {

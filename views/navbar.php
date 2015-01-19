@@ -24,7 +24,7 @@ $root = "//localhost/test/";
 					<a href=<?=$root?>>Frontpage</a>
 				</li>
 				<li <?php if (preg_match('/groups/', $page)) echo ' class="active"'?>>
-					<a href=<?=$root, "groups"?>>Groups</a>
+					<a href=<?=$root, "groups?select"?>>Groups</a>
 				</li>
 				<li <?php if (preg_match('/events/', $page)) echo ' class="active"'?>>
 					<a href=<?=$root, "events"?>>Events</a>
