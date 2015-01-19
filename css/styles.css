@@ -20,14 +20,9 @@
 	z-index: 100000;
 }
 
-div.panel-heading {
+div#panelTitle{
 	background-color:#A6373F;
 	color: #ecf0f1;	
-}
-
-div#scheduleControl {
-	position:relative;
-	top: 50px;
 }
 
 #register {

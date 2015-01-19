@@ -60,7 +60,7 @@
 			
 		$stmt->close();
 
-		$query = "SELECT s_events.event_id, subjects.name, s_events.day, s_events.time_start, s_events.time_end
+		$query = "SELECT s_events.event_id, subjects.name, s_events.subject_id, s_events.day, s_events.time_start, s_events.time_end
 			FROM s_events
 			INNER JOIN subjects on s_events.subject_id = subjects.subject_id
 			WHERE schedule_id = ?;";
@@ -78,7 +78,7 @@
 		if(false === $ok)
 		die("Execute failed");
 		
-		$ok = $stmt->bind_result($event_id, $title, $day, $timeStart, $timeEnd);
+		$ok = $stmt->bind_result($event_id, $title, $subject_id, $day, $timeStart, $timeEnd);
 		if(false === $ok)
 		die("bind_result failed");
 		
@@ -99,9 +99,11 @@
 			
 			$events[] = array(
 				'id' => $event_id,
+				'subject_id' => $subject_id,
 				'title' => $title,
-				'start' => date('Y-m-d H:i', $lastMonday + $secondsStart),
-				'end' => date('Y-m-d H:i', $lastMonday + $secondsEnd));
+				'day' => $day,
+				'start' => date('Y-m-d H:i', $lastMonday + $secondsStart + ($day - 1) * 24 * 60 * 60),
+				'end' => date('Y-m-d H:i', $lastMonday + $secondsEnd + ($day - 1) * 24 * 60 * 60));
 		}
 		
 		echo json_encode($events);
