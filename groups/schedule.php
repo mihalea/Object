@@ -7,10 +7,10 @@
 		
 		<!-- Latest compiled and minified CSS -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-		<link rel="stylesheet" href="css/styles.css">
 		<link rel="stylesheet" href="css/fullcalendar.min.css">
 		<link rel="stylesheet" href="css/fullcalendar.print.css" media="print">
 		<link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+		<link rel="stylesheet" href="css/styles.css">
 		
 		
 		
@@ -104,7 +104,21 @@
 					</div>
 				</div>
 				
-				<div id='schedule'></div>
+				<div class="row">
+					<div class="col-md-8">
+						<div id='schedule'></div>
+					</div>
+					<div class="col-md-4">
+						<div class="panel panel-default" id="scheduleControl">
+							<div class="panel-heading">
+								Header
+							</div>
+							<div class="panel-body">
+								Body
+							</div>
+						</div>
+					</div>
+				</div>
 				
 			</div>
 			
@@ -137,12 +151,18 @@
 							center: 'title',
 							right: ''
 						},
+						editable: true,
 						events: "<?=SITE_ROOT, "groups/getEvents.php?group_id=", $group->getID()?>",
 						eventLimit: true, 
 						defaultView: 'agendaWeek',
 						eventColor: '#a6373f',
 						firstDay: 1,
-						aspectRatio: 1.85
+						scrollTime: '07:00:00',
+						weekends: false,
+						//aspectRatio: 1.85,
+						eventClick: function(callEvent, jsEvent, view) {
+							console.log(callEvent["_start"]);
+						}
 					})
 					
 				});
