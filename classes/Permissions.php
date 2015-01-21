@@ -3,6 +3,8 @@
 	{
 		if(empty($group_id))
 			$group_id = $_SESSION["group_id"];
+			
+		
 		if(isset($_SESSION["id"]) AND !empty($_SESSION["id"])) {
 			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 		
@@ -14,7 +16,8 @@
 			if(false === $stmt)
 			die("Prepare failed");
 			
-			$ok = $stmt->bind_param("ii", $_SESSION["group_id"], $_SESSION["id"]);
+			
+			$ok = $stmt->bind_param("ii", $group_id, $_SESSION["id"]);
 			if(false === $ok)
 			die("bind_param failed");
 			
@@ -22,7 +25,8 @@
 			if(false === $ok)
 			die("Execute failed");
 			
-			$stmt->store_result();
+			$stmt->store_result();			
+			
 			if($stmt->num_rows == 1) {
 				$stmt->bind_result($dbFlag);
 				$stmt->fetch();

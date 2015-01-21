@@ -27,6 +27,7 @@ div#panelTitle{
 
 a.white-link {
 	color: #ecf0f1;	
+	cursor:pointer;
 }
 
 input.readOnly {

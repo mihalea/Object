@@ -147,7 +147,7 @@
 				die("Empty id");
 			else
 			{		
-			
+				
 				if(hasGroupFlag('u', $_GET["setid"]) == false)
 					return false;
 					

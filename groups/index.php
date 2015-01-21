@@ -21,7 +21,6 @@
 			$login = new Login();
 			$manager = new GroupManager();
 			
-			
 			if ($login->isLogged()) { 
 			include("../views/navbar.php"); 
 			

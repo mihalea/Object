@@ -55,9 +55,9 @@
 					<div class="col-md-4">
 						<div class="panel panel-default" id="scheduleControl">
 							<div class="panel-heading" id="panelTitle">
-								Class details
+								<span id="panelText">Class details</span>
 								<div class="pull-right">
-									<?php if(hasGroupFlag('a')) echo '<small><a href="#" class="white-link" id="remLink">Delete</a></small>' ?>
+									<?php if(hasGroupFlag('a')) echo '<small><a class="white-link" id="remLink">Delete</a></small>' ?>
 								</div>
 							</div>
 							<div class="panel-body">
@@ -83,8 +83,6 @@
 												<option value="3">Wednesday</option>
 												<option value="4">Thursday</option>
 												<option value="5">Friday</option>
-												<option value="6">Saturday</option>
-												<option value="7">Sunday</option>
 											</select>
 										</div>
 									</div>
@@ -167,9 +165,11 @@
 						//aspectRatio: 1.85,
 						eventClick: function(callEvent, jsEvent, view) {
 							if(createMode == true) {
-								$("#panelTitle").text("Class details");
+								$("#panelText").text("Class details");
 								$("#panelTitle").attr("style", "background-color: #a6373f");
+								createMode = false;
 							}
+							$(".white-link").show();
 							
 							var start = moment(callEvent["start"]).format("H:mm");
 							var end = moment(callEvent["end"]).format("H:mm");
@@ -198,6 +198,8 @@
 						echo "$('#submit').hide()";
 						}
 				?>
+				$(".white-link").hide();
+
 				
 				$(function () {
 					$('#pickStart').datetimepicker({
@@ -212,24 +214,27 @@
 				$("#btnAdd").click(function() {
 					createMode = true;
 					
-					$("#panelTitle").text("Add new class");
+					$("#panelText").text("Add new class");
 					$("#panelTitle").attr("style", "background-color: #337ab7");
 					$("#ctrlStart").val("08:00");
 					$("#ctrlEnd").val("08:50");
 					$("#hiddenID").val("-1");
+					$(".white-link").hide();
 				});
 				
-				$("#submit").click(function() {
+				$("#remLink").click(function() {
+					$('#submit').attr("name", "remClass");
+					$('#submit').click();
+				});
+				
+				$( "#schedForm" ).submit(function( event ) {
 					var subject = $('#ctrlSubject').val(); 
 					$('#hiddenSubject').val(subject);
 					
 					var day = $('#ctrlDay').val(); 
 					$('#hiddenDay').val(day);
-				});
-				
-				$("#remLink").click(function() {
-					$('#schedForm').attr(name, "remClass");
-					$('#schedForm').post();
+
+					//event.preventDefault();
 				});
 			</script> 
 			<?php } else { 

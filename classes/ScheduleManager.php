@@ -10,15 +10,19 @@
 			if($this->conn->connect_error)
 			die($this->conn->connect_error);
 			
-			$head = 'Location: ' . SITE_ROOT . "groups/";
+			$head = 'Location: ' . SITE_ROOT . "groups/schedule.php";
 			
 			if(empty($_SESSION["group_id"]))
 			header($head . "?select");
 			
-			if(isset($_POST["editClass"])) {
-				$head = $head . "schedule.php";
-				
+			if(isset($_POST["editClass"])) {		
 				if($this->editClass() == true) {
+					header($head);
+					} else {
+					header($head . "?error");
+				}
+			} elseif (isset($_POST["remClass"])) {
+				if($this->removeClass() == true) {
 					header($head);
 					} else {
 					header($head . "?error");
@@ -39,7 +43,6 @@
 				} elseif (empty($_POST["time_end"])) {
 				$this->errors[] = "Could not find end time";
 				} else {
-				
 				
 				if(isset($_POST["event_id"]) AND $_POST["event_id"] != "-1")
 				return $this->updateEvent();
@@ -72,7 +75,7 @@
 		}
 		
 		private function createEvent() {			
-			if(empty($SESSION["schedule_id"])) {
+			if(empty($_SESSION["schedule_id"])) {
 				$query = "INSERT INTO schedules (user_id) VALUES (?);";
 				$stmt = $this->conn->prepare($query);
 				if(false === $stmt)
@@ -128,9 +131,9 @@
 			if(false === $stmt)
 			die("prepare() failed");
 			
-			$code = $stmt->bind_param("iiiss", $_POST["schedule_id"], $_POST["subject_id"], $_POST["day"],
+			$ok = $stmt->bind_param("iiiss", $_POST["schedule_id"], $_POST["subject_id"], $_POST["day"],
 			$_POST["time_start"], $_POST["time_end"]);
-			if(false === $code)
+			if(false === $ok)
 			die("bind_param() failed");
 			
 			$ok = $stmt->execute();
@@ -139,6 +142,28 @@
 			$stmt->close();
 			
 			return true;
+		}
+		
+		private function removeClass() 
+		{
+			if(empty($_POST["event_id"])) {
+				return false;
+			} else {
+				$query = "DELETE FROM s_events WHERE event_id = ?;";
+				$stmt = $this->conn->prepare($query);
+				if(false === $stmt)
+				die("prepare() failed");
+				
+				$ok = $stmt->bind_param("i", $_POST["event_id"]);
+				if(false === $ok)
+				die("bind_param() failed");
+				
+				$ok = $stmt->execute();
+				if(false === $ok)
+				die("Execute failed");
+				$stmt->close();
+				return true;
+			}
 		}
 	}
 ?>
