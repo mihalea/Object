@@ -12,7 +12,8 @@
 		public function __construct()
 		{
 			$url = "Location: " . SITE_ROOT . "groups?";
-			if(isset($_SESSION["group_id"]) && !empty($_SESSION["group_id"]))
+			
+			if(isset($_SESSION["group_id"]) AND !empty($_SESSION["group_id"]) AND empty($_GET["setid"]))
 				$url = $url . "id=" . $_SESSION["group_id"];
 				
 			$this->conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
@@ -37,7 +38,7 @@
 				if($this->setID() == true) {
 					header($url);
 					} else {
-					#header($url . "&error=set");
+					header($url . "select&error=set");
 				}
 			}
 		}
@@ -223,15 +224,15 @@
 			}
 		}
 		
-		private static function getMembers() {
+		public static function getMembers() {
 			if(!empty($_SESSION["group_id"])) {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			
-				$query = "SELECT membership.user_id, members.username
+				$query = "SELECT membership.user_id, members.name
 				FROM membership
 				INNER JOIN members ON membership.user_id = members.user_id
 				WHERE group_id = ?;";
-				$stmt = $this->conn->prepare($query);
+				$stmt = $conn->prepare($query);
 				if(false === $stmt)
 				die("Prepare failed");
 				

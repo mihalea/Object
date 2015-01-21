@@ -4,18 +4,14 @@
 		<meta charset="utf-8">
 		
 		<base href="//localhost/test/">
-		
-		
+			
 		<!-- Latest compiled and minified CSS -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="css/fullcalendar.min.css">
 		<link rel="stylesheet" href="css/fullcalendar.print.css" media="print">
 		<link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
 		<link rel="stylesheet" href="css/styles.css">
-		
-		
-		
-		
 		
 		<title> Schedule </title>
 	</head>
@@ -31,7 +27,7 @@
 			$login = new Login();
 			$schedule = new ScheduleManager();
 			
-			if ($login->isLogged()) { 
+			if ($login->isLogged() AND hasGroupFlag('u')) { 
 			include("../views/navbar.php"); ?>
 			
 			
@@ -39,8 +35,8 @@
 			<div class="container">
 				<div class="page-header">
 					<h2>
-						<span>Schedule for <?=$_SESSION["group_name"]?></span>
-						
+						<span><a href="groups"><?=$_SESSION["group_name"]?></a> <i class="fa fa-angle-right"></i> Schedule</span>
+
 						<?php if (hasGroupFlag('a')) { ?>
 							<button type="button" class="btn btn-primary pull-right" id="btnAdd"><span class="glyphicon glyphicon-plus-sign">&nbsp;</span>Add class</button>
 						<?php } ?>
@@ -65,7 +61,7 @@
 									<div class="form-group">
 										<label for="ctrlSubject" class="col-sm-2 control-label">Subject:</label>
 										<div class="col-sm-10">
-											<select class="form-control" id="ctrlSubject"  style="background-color:#fff;" required>
+											<select class="form-control" id="ctrlSubject" name="subject_id"  style="background-color:#fff;" required>
 												<?php
 													foreach(GroupManager::getSubjects() as $sub)
 													echo '<option value="'. $sub["id"] .'">' . $sub["name"] . '</option>';
@@ -77,7 +73,7 @@
 									<div class="form-group">
 										<label for="ctrlDay" class="col-sm-2 control-label read-only">Day: </label>
 										<div class="col-sm-10">
-											<select class="form-control" id="ctrlDay" style="background-color:#fff;"  required>
+											<select class="form-control" id="ctrlDay" name="day" style="background-color:#fff;"  required>
 												<option value="1">Monday</option>
 												<option value="2">Tuesday</option>
 												<option value="3">Wednesday</option>
@@ -110,8 +106,6 @@
 									<input type="hidden" name="group_id" value="<?=$_SESSION["group_id"]?>"></input>
 									<input type="hidden" name="schedule_id" value="<?=$_SESSION["schedule_id"]?>"></input>
 									<input type="hidden" name="event_id" id="hiddenID"></input>
-									<input type="hidden" name="subject_id" id="hiddenSubject"></input>
-									<input type="hidden" name="day" id="hiddenDay"></input>
 									<input type="submit" name="editClass" id="submit" class="btn btn-success pull-right"></input>
 									<div class="clearfix"></div>
 								</form>
@@ -225,16 +219,6 @@
 				$("#remLink").click(function() {
 					$('#submit').attr("name", "remClass");
 					$('#submit').click();
-				});
-				
-				$( "#schedForm" ).submit(function( event ) {
-					var subject = $('#ctrlSubject').val(); 
-					$('#hiddenSubject').val(subject);
-					
-					var day = $('#ctrlDay').val(); 
-					$('#hiddenDay').val(day);
-
-					//event.preventDefault();
 				});
 			</script> 
 			<?php } else { 

@@ -55,13 +55,15 @@
 						echo '<div class="alert alert-danger""><p>Error! Failed to create new group</p></div>';
 					} elseif (isset($_GET["error"]) AND $_GET["error"] == "noAccess") {
 						echo '<div class="alert alert-danger""><p>Error! You don\'t have acces to that group.</p></div>';
+					} elseif(isset($_GET["error"]) AND $_GET["error"] == "set") {
+						echo '<div class="alert alert-danger""><p>Error! Failed to open that group</p></div>';
 					}
 	
 					GroupManager::printGroups();
 					?>
 				</div>
 				
-				<?php } elseif (isset($_SESSION["group_id"])) {; ?>
+				<?php } elseif (isset($_SESSION["group_id"]) AND hasGroupFlag('u')) {; ?>
 				
 				<script type="text/javascript">
 					document.title = "<?= $_SESSION['group_name']?>";
@@ -70,10 +72,10 @@
 				<div class="container">
 					<div class="row">
 							<div class="page-header">
-								<h1>
+								<h2>
 									<span><?= $_SESSION["group_name"] ?></span>
 									<button type="button" class="btn btn-primary pull-right" data-toggle="collapse" data-target="#newMessageCollapse" aria-expanded="false" aria-controls="newMessageCollapse"><span class="glyphicon glyphicon-pencil">&nbsp;</span>New post</button>
-								</h1>
+								</h2>
 							</div>
 					</div>
 					<div class="row">
@@ -118,7 +120,7 @@
 							<div class="list-group">
 								<span class="list-group-item list-heading">Dashboard</span>
 								<a href="groups/schedule.php" class="list-group-item">Schedule</a>
-								<a href="#" class="list-group-item">Materials</a>
+								<a href="groups/materials.php" class="list-group-item">Materials</a>
 								<a href="#" class="list-group-item">Members</a>
 							</div>
 						</div>

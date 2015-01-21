@@ -64,7 +64,7 @@
 							<div class="form-group">
 								<label for="inputComment" class="col-sm-2 control-label">Comment: </label>
 								<div class="col-sm-10">
-								<textarea rows="3" id="inputComment" name="comment" class="form-control"/></textarea>
+								<textarea rows="3" id="inputComment" name="comment" class="form-control"></textarea>
 							</div>
 						</div>
 						
@@ -79,9 +79,9 @@
 			
 			<?php 
 				if (isset($_GET["error"]) AND $_GET["error"] == "add") {
-					echo '<div class="alert alert-danger" style="position:relative; top:20px;"><p>Failed to add the event</p></div>';
+					echo '<div class="alert alert-danger" style="position:relative; top:20px;"><p>Error! Failed to add the event</p></div>';
 					} elseif (isset($_GET["error"]) AND $_GET["error"] == "rem") {
-					echo '<div class="alert alert-danger"><p>Failed to remove the event</p></div>'; 
+					echo '<div class="alert alert-danger"><p>Error! Failed to remove the event</p></div>'; 
 				}
 				
 			?>

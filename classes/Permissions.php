@@ -5,7 +5,7 @@
 			$group_id = $_SESSION["group_id"];
 			
 		
-		if(isset($_SESSION["id"]) AND !empty($_SESSION["id"])) {
+		if(!empty($_SESSION["id"])) {
 			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 		
 			$query = "SELECT flag
