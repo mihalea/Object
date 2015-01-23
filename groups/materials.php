@@ -185,6 +185,7 @@
 												<input type="text" id="inTitle" class="form-control" name="title" required></input>
 											</div>
 										</div>
+										
 										<div class="form-group">
 											<label for='inSubjects' class="col-sm-3 control-label">Subject:</label>
 											<div class="col-sm-9">
@@ -196,12 +197,14 @@
 												</select>
 											</div>
 										</div>
+										
 										<div class="form-group">
 											<label for='inAuthor' class="col-sm-3 control-label">Author:</label>
 											<div class="col-sm-9">
 												<input type="text" id="inAuthor" class="form-control" name="author" required></input>
 											</div>
 										</div>
+										
 										<div class="form-group">
 											<label for="inComment" class="col-sm-3 control-label">Comment: </label>
 											<div class="col-sm-9">
@@ -209,12 +212,24 @@
 											</div>
 										</div>
 										
-										<span class="btn btn-primary fileinput-button">
-											<i class="glyphicon glyphicon-plus"></i>
-											<span>Select file</span>
-											<input id="fileupload" type="file" name="files[]">
+										<div class="form-group">
+											<label for="inFile" class="col-sm-3 control-label">File: </label>
+											<div class="col-sm-9">
+												<span id="inFile" class="form-control">None</span>
+											</div>
+										</div>
+
+																				
+										<div class="pull-right">
+											<span class="btn btn-primary fileinput-button">
+												<i class="glyphicon glyphicon-plus"></i>
+												<span>Select file</span>
+												<input id="fileupload" type="file" name="files[]" required>
+												
+											</span>
 											
-										</span>
+											<input type="submit" class="btn btn-success" value="Upload" id="upload" disabled="disabled">
+										</div>
 										
 									</form>
 									
@@ -260,7 +275,10 @@
 				var url = 'transfer/';
 				$('#fileupload').fileupload({
 					url: url,
+					autoUpload: false,
 					dataType: 'json',
+					 acceptFileTypes: /(\.|\/)(zip|rar|7z|pdf)$/i,
+					maxFileSize: 50 * 1024 * 1024,
 					done: function (e, data) {
 						window.location.href="groups/materials.php?success";				
 					},
@@ -271,6 +289,11 @@
 						progress + '%'
 						);
 					}
+				}).on('fileuploadadd', function (e, data) {
+					$.each(data.files, function (index, file) {
+						$('#inFile').text(file.name);
+						$('#upload').removeAttr('disabled');
+					});
 				}).prop('disabled', !$.support.fileInput)
 				.parent().addClass($.support.fileInput ? undefined : 'disabled');
 			});
