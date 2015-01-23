@@ -17,6 +17,7 @@ class UploadHandler
 {
 
     protected $options;
+	private $filename;
 
     // PHP File Upload error message codes:
     // http://php.net/manual/en/features.file-upload.errors.php
@@ -49,7 +50,7 @@ class UploadHandler
             'script_url' => $this->get_full_url().'/',
             //'upload_dir' => dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/',
 			'upload_dir' => 'C:/files/',
-            'upload_url' => $this->get_full_url().'/files/',
+            'upload_url' => $this->get_full_url().'/?file_id=',
             'user_dirs' => false,
             'mkdir_mode' => 0755,
             'param_name' => 'files',
@@ -85,10 +86,10 @@ class UploadHandler
             // Defines which files can be displayed inline when downloaded:
             'inline_file_types' => '/\.(gif|jpe?g|png)$/i',
             // Defines which files (based on their names) are accepted for upload:
-            'accept_file_types' => '/^.*\.(rar|zip|7z)$/i',
+            'accept_file_types' => '/^.*\.(rar|zip|7z|pdf)$/i',
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
-            'max_file_size' => null,
+            'max_file_size' => 50 * 1024 * 1024, //50 MiB
             'min_file_size' => 1,
             // The maximum number of files for the upload directory:
             'max_number_of_files' => null,
@@ -167,6 +168,8 @@ class UploadHandler
     }
 
     protected function initialize() {
+	
+		$this->get_db_name();
         switch ($this->get_server_var('REQUEST_METHOD')) {
             case 'OPTIONS':
             case 'HEAD':
@@ -187,7 +190,44 @@ class UploadHandler
                 $this->header('HTTP/1.1 405 Method Not Allowed');
         }
     }
-
+	
+	protected function get_db_name() {
+		$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+		
+		$query = "SELECT filename, user_id, group_id
+		FROM files
+		WHERE file_id = ? AND user_id = ?
+		LIMIT 1;";
+		$stmt = $conn->prepare($query);
+		if(false === $stmt)
+		die("Prepare failed");
+		
+		
+		$ok = $stmt->bind_param("ii", $_GET["file_id"], $_SESSION["id"]);
+		if(false === $ok)
+		die("bind_param failed");
+		
+		$ok = $stmt->execute();
+		if(false === $ok)
+		die("Execute failed");
+		
+		$stmt->store_result();			
+		
+		if($stmt->num_rows == 1) {
+			$stmt->bind_result($filename, $user_id, $group_id);
+			$stmt->fetch();
+			
+			if('DELETE' == $this->get_server_var('REQUEST_METHOD')) {
+				if($user_id != $_SESSION["id"])
+					die("You don't have permission to delete that file");
+			}
+			
+			$this->filename = $filename;
+		}
+		
+		
+	}
+	
     protected function get_full_url() {
         $https = !empty($_SERVER['HTTPS']) && strcasecmp($_SERVER['HTTPS'], 'on') === 0 ||
             !empty($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
@@ -299,13 +339,13 @@ class UploadHandler
     }
 
     protected function get_file_object($file_name) {
-        if ($this->is_valid_file_object($file_name)) {
+        if ($this->is_valid_file_object($file_name) AND $this->is_owner($file_name)) {
             $file = new \stdClass();
             $file->name = $file_name;
             $file->size = $this->get_file_size(
                 $this->get_upload_path($file_name)
             );
-            $file->url = $this->get_download_url($file->name);
+            /*$file->url = $this->get_download_url($file->name);
             foreach($this->options['image_versions'] as $version => $options) {
                 if (!empty($version)) {
                     if (is_file($this->get_upload_path($file_name, $version))) {
@@ -316,12 +356,12 @@ class UploadHandler
                     }
                 }
             }
-            $this->set_additional_file_properties($file);
+            $this->set_additional_file_properties($file);*/
             return $file;
         }
         return null;
     }
-
+	
     protected function get_file_objects($iteration_method = 'get_file_object') {
         $upload_dir = $this->get_upload_path();
         if (!is_dir($upload_dir)) {
@@ -332,6 +372,40 @@ class UploadHandler
             scandir($upload_dir)
         )));
     }
+	
+	protected function is_owner($file_name){
+		$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+		
+		$query = "SELECT user_id
+		FROM files
+		WHERE filename = ?
+		LIMIT 1;";
+		$stmt = $conn->prepare($query);
+		if(false === $stmt)
+		die("Prepare failed");
+		
+		
+		$ok = $stmt->bind_param("s", $file_name);
+		if(false === $ok)
+		die("bind_param failed");
+		
+		$ok = $stmt->execute();
+		if(false === $ok)
+		die("Execute failed");
+		
+		$stmt->store_result();			
+		
+		if($stmt->num_rows == 1) {
+			$stmt->bind_result($user_id);
+			$stmt->fetch();
+			
+			if($user_id == $_SESSION["id"])
+				return true;
+			else
+				return false;
+		}
+		return false;
+	}
 
     protected function count_file_objects() {
         return count($this->get_file_objects('is_valid_file_object'));
@@ -1050,7 +1124,7 @@ class UploadHandler
 		
 	protected function generate_unique_filename($uploaded_file, $name, $size, $type, $error, $index, $content_range)
 	{
-		if(empty($_POST["title"]) OR empty($_POST["subject"]) OR empty($_POST["author"]) OR empty($_POST["comment"]))
+		if(empty($_POST["title"]) OR empty($_POST["subject"]) OR empty($_POST["author"]))
 			die("POST not filled");
 	
 		$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
@@ -1075,8 +1149,8 @@ class UploadHandler
 		$stmt->fetch();
 		$stmt->close();
 		
-		$query = "INSERT INTO files (filename, original_name, group_id, user_id, title, subject_id, author_id, comment) 
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+		$query = "INSERT INTO files (filename, original_name, size, group_id, user_id, title, subject_id, author_id, comment, date) 
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW());";
 		$stmt = $conn->prepare($query);
 		if(false === $stmt)
 		die("Prepare failed");
@@ -1085,7 +1159,7 @@ class UploadHandler
 		$original = $this->trim_file_name($uploaded_file, $name, $size, $type, $error, $index, $content_range);
 
 		
-		$ok = $stmt->bind_param("ssiisiis", $unique, $original, $_SESSION["group_id"], $_SESSION["id"], $_POST["title"],
+		$ok = $stmt->bind_param("ssiiisiis", $unique, $original, $size, $_SESSION["group_id"], $_SESSION["id"], $_POST["title"],
 										$_POST["subject"], $author_id, $_POST["comment"]);
 		if(false === $ok)
 		die("bind_param failed");
@@ -1403,7 +1477,8 @@ class UploadHandler
     }
 
     public function delete($print_response = true) {
-        $file_names = $this->get_file_names_params();
+	
+        $file_names = array ( $this->filename );
         if (empty($file_names)) {
             $file_names = array($this->get_file_name_param());
         }
@@ -1412,11 +1487,14 @@ class UploadHandler
             $file_path = $this->get_upload_path($file_name);
             $success = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
             if ($success) {
+				$this->remove_db();
                 foreach($this->options['image_versions'] as $version => $options) {
                     if (!empty($version)) {
                         $file = $this->get_upload_path($file_name, $version);
                         if (is_file($file)) {
+						
                             unlink($file);
+							
                         }
                     }
                 }
@@ -1425,5 +1503,24 @@ class UploadHandler
         }
         return $this->generate_response($response, $print_response);
     }
+	
+	protected function remove_db()
+	{
+		$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+		
+		$query = "DELETE FROM files WHERE file_id = ?";
+		$stmt = $conn->prepare($query);
+		if(false === $stmt)
+		die("Prepare failed");
+		
+		
+		$ok = $stmt->bind_param("i", $_GET["file_id"]);
+		if(false === $ok)
+		die("bind_param failed");
+		
+		$ok = $stmt->execute();
+		if(false === $ok)
+		die("Execute failed");
+	}
 
 }

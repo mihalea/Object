@@ -9,25 +9,39 @@
 .post {
 	padding:15px;
 	padding-bottom: 0px;
+	padding-top: 0px;
 }
 
-.list-heading {
-	background-color:#A6373F;
-	color: #ecf0f1;
+.break-h{
+	word-wrap: break-word;
+}
+
+.red-heading {
+	background-color:#7c151d !important;
+	color: #ecf0f1 !important;
 }
 
 .date-control {
 	z-index: 100000;
 }
 
-div#panelTitle{
-	background-color:#A6373F;
-	color: #ecf0f1;	
+.red-pageheader {
+	padding-bottom: 5px;
+	border-bottom: 1px solid #ccc;
 }
 
 div.no-margin {
 	margin: 0px;
 	height: 30px;
+}
+
+body {
+	background-color: #f2f2f4;
+}
+
+.top-buttons {
+	position: relative;
+	top: -8px;
 }
 
 a.white-link {
@@ -88,6 +102,10 @@ input.bottom{
 	margin-bottom: 15px;
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
+}
+
+.fc-view-container {
+	background-color:#fff;
 }
 
 .form-signin input[type="submit"] {

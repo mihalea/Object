@@ -9,7 +9,7 @@
 			if(!empty($_GET["file_id"])) {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 				
-				$query = "SELECT filename, original_name
+				$query = "SELECT filename, original_name, group_id
 				FROM files
 				WHERE file_id = ?
 				LIMIT 1;";
@@ -26,12 +26,15 @@
 				if(false === $ok)
 				die("Execute failed");
 				
-				$ok = $stmt->bind_result($filename, $original_name);
+				$ok = $stmt->bind_result($filename, $original_name, $group_id);
 				if(false === $ok)
 				die("Bind result failed");
 				
 				$stmt->fetch();
 				$stmt->close();
+				
+				if(hasGroupFlag('u', $group_id) == false)
+					die("You don't have access to this file.");
 				
 				$path = realpath('C:/files/' . $filename);
 				

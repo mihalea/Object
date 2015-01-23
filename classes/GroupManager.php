@@ -3,6 +3,7 @@
 	require_once($path);
 	
 	require_once("../classes/Permissions.php");
+	require_once("../classes/Helper.php");
 	
 	class GroupManager {
 		
@@ -12,9 +13,7 @@
 		public function __construct()
 		{
 			$url = "Location: " . SITE_ROOT . "groups?";
-			
-			if(isset($_SESSION["group_id"]) AND !empty($_SESSION["group_id"]) AND empty($_GET["setid"]))
-				$url = $url . "id=" . $_SESSION["group_id"];
+	
 				
 			$this->conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			if($this->conn->connect_error) {
@@ -26,13 +25,13 @@
 				if ($this->createGroup() == true) {
 					header($url);
 					} else {
-					header($url . "&error=create");
+					header($url . "error=create");
 				}
 			} elseif (isset($_POST["newPost"])) {
 				if($this->createPost() == true) {
 					header($url);
 					} else {
-					header($url . "&error=post");
+					header($url . "error=post");
 				}
 			} elseif (isset($_GET["setid"])) {
 				if($this->setID() == true) {
@@ -105,7 +104,7 @@
 		{
 			if(!isset($_POST["post"]) OR empty($_POST["post"])) {
 				$this->errors[] = "Empty post var: text";
-				} elseif(!isset($_GET["id"]) OR empty($_GET["id"])) {
+				} elseif(!isset($_SESSION["group_id"]) OR empty($_SESSION["group_id"])) {
 				$this->errors[] = "Group not selected";
 				} elseif(!isset($_SESSION["id"]) OR empty($_SESSION["id"])) {
 				$this->errors[] = "Empty or not set user id";
@@ -118,9 +117,12 @@
 					return false;
 				}
 				
-				$group_id = $_GET["id"];
+				$raw = $_POST["post"];
+				$stripped = strip_tags($raw);
+				
+				$group_id = $_SESSION["group_id"];
 				$user_id = $_SESSION["id"];
-				$text = $_POST["post"];
+				$text = $string;
 				
 				$ok = $stmt->bind_param("iis", $group_id, $user_id, $text);
 				if(false === $ok) {
@@ -261,6 +263,57 @@
 			}
 		}
 		
+		public static function getMaterials() {
+			if(!empty($_SESSION["group_id"])) {
+				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+			
+				$query = "SELECT f.file_id, f.original_name, f.size, f.title, f.comment, f.date, f.subject_id, m1.name, m2.name, s.name, f.user_id
+				FROM files f
+				INNER JOIN members m1 ON f.author_id = m1.user_id
+				INNER JOIN members m2 ON f.user_id = m2.user_id
+				INNER JOIN subjects s ON f.subject_id = s.subject_id
+				WHERE group_id = ?
+				ORDER BY f.date DESC;";
+				$stmt = $conn->prepare($query);
+				if(false === $stmt)
+				die("Prepare failed");
+				
+				$ok = $stmt->bind_param("i", $_SESSION["group_id"]);
+				if(false === $ok)
+				die("bind_param failed");
+				
+				$ok = $stmt->execute();
+				if(false === $ok)
+				die("Execute failed");
+				
+				$ok = $stmt->bind_result($file_id, $filename, $size, $title, $comment, $date, $subject_id, $author, $uploader, $subject, $uploader_id);
+				if(false === $ok)
+				die("bind_result failed");
+				
+				$materials = array();
+				while($stmt->fetch())
+				{
+					$materials[] = array(
+										'file_id' => $file_id,
+										'filename' => $filename,
+										'size' => $size,
+										'title' => $title,
+										'comment' => $comment,
+										'date' => $date,
+										'subject_id' => $subject_id,
+										'author' => $author,
+										'uploader' => $uploader,
+										'subject' => $subject,
+										'uploader_id' => $uploader_id);
+				}
+				
+				$stmt->close();
+				$conn->close();
+				
+				return $materials;
+			}
+		}
+		
 		public static function printGroups()
 		{		
 				if(!empty($_SESSION["id"])) {
@@ -363,37 +416,8 @@
 			$this->datetime = $datetime;
 		}
 		
-		public function timeDifference() {
-			$timeNow = time() + (2 * 60 * 60);
-			$timePost = strtotime($this->datetime);
-			
-			
-			$time = $timeNow - $timePost;
-			
-			$time = $time / 60; #minutes
-			if( $time < 60 ) {
-				$time = round($time);
-				
-				if($time == 1)
-				return $time . ' minute ago';
-				else
-				return $time . ' minutes ago';
-				} else {
-				$time = $time / 60;
-				if ( $time < 24 ) {
-					$time = round($time);
-					if($time == 1)
-					return $time . ' hour ago';
-					else
-					return $time . ' hours ago';
-					} else {
-					$time = round($time / 24);
-					if($time == 1)
-					return $time . ' day ago';
-					else
-					return $time . ' days ago';
-				}
-			}
+		public function getTimeAgo() {
+			return timeDifference($this->datetime);
 		}
 	}
 	

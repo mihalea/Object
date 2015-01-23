@@ -27,7 +27,7 @@
 				if(isset($_GET["select"])) { ?>
 				
 				<div class="container">
-					<div class="page-header">
+					<div class="page-header red-pageheader">
 						<h2> 
 							<span>Your groups</span> 
 							<button type="button" class="btn btn-primary pull-right" data-toggle="collapse" data-target="#createGroupCollapse" aria-expanded="false" aria-controls="createGroupCollapse"><span class="glyphicon glyphicon-plus-sign">&nbsp;</span>Create group</button>
@@ -71,7 +71,7 @@
 				
 				<div class="container">
 					<div class="row">
-							<div class="page-header">
+							<div class="page-header red-pageheader">
 								<h2>
 									<span><?= $_SESSION["group_name"] ?></span>
 									<button type="button" class="btn btn-primary pull-right" data-toggle="collapse" data-target="#newMessageCollapse" aria-expanded="false" aria-controls="newMessageCollapse"><span class="glyphicon glyphicon-pencil">&nbsp;</span>New post</button>
@@ -105,11 +105,14 @@
 								if(is_array($posts) AND count($posts) > 0) {
 									foreach($posts as $post) {
 										echo '<div class="panel panel-default post"><div class="panel-body">';
+										echo '<div class="pull-right"><span class="glyphicon glyphicon-remove"></span></div><br />';
 										echo $post->text;
-										echo '<hr /><small><span class="glyphicon glyphicon-user">&nbsp;</span>'
-											. $post->user->name . '</small>';
-										echo '<div class="pull-right"><small><span class="glyphicon glyphicon-calendar">&nbsp;</span>'
-											. $post->timeDifference() . '</small></div>';
+										echo '<hr />';
+										echo '<div class="pull-right"><small>';
+										echo '<span class="glyphicon glyphicon-user"></span>&nbsp;'
+											. $post->user->name . '&nbsp;&nbsp;';
+										echo '<span class="glyphicon glyphicon-calendar"></span>&nbsp;'
+											. $post->getTimeAgo() . '</small></div>';
 										echo '</div></div>';
 									}
 								}
@@ -118,7 +121,7 @@
 						<div class="col-sm-3">
 
 							<div class="list-group">
-								<span class="list-group-item list-heading">Dashboard</span>
+								<span class="list-group-item red-heading">Dashboard</span>
 								<a href="groups/schedule.php" class="list-group-item">Schedule</a>
 								<a href="groups/materials.php" class="list-group-item">Materials</a>
 								<a href="#" class="list-group-item">Members</a>

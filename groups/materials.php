@@ -7,17 +7,26 @@
 		
 		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-		<link rel="stylesheet" href="css/styles.css">
+		<link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
 		<link rel="stylesheet" href="css/jquery.fileupload.css">
+		<link rel="stylesheet" href="css/styles.css">
+		
+		<style>
+			.fixed-width {
+				width:150px;
+			}
+		</style>
 		
 		<title> Materials </title>
 	</head>
 	<body>
 		<?php
 			require_once("../config/db.php");
+			require_once("../config/site.php");
 			require_once("../classes/Login.php");
 			require_once("../classes/Permissions.php");
 			require_once("../classes/GroupManager.php");
+			require_once("../classes/Helper.php");
 			
 			$login = new Login();
 			
@@ -26,7 +35,7 @@
 			
 			
 			<div class="container">
-				<div class="page-header">
+				<div class="page-header red-pageheader">
 					<h2>
 					<span><a href="groups"><?=$_SESSION["group_name"]?></a> <i class="fa fa-angle-right"></i> </span> Materials</span>
 				</h2>
@@ -37,46 +46,133 @@
 				<div class="col-sm-8">
 					<?php 
 						if (isset($_GET["success"])) {
-							echo '<div class="alert alert-success" style="position:relative; top:20px;"><p>Success! The material has been added to this group.</p></div>';
+							echo '<div class="alert alert-success"><p>Success! The material has been added to this group.</p></div>';
 						}
-						
+
+												
+						$materials = GroupManager::getMaterials();
+						if(is_array($materials) AND count($materials) > 0) {
+							foreach($materials as $mat) { 
+								
+									
+								
+									if(!empty($_GET["subject"]) AND$_GET["subject"] != 0 AND $_GET["subject"] != $mat["subject_id"])
+										continue;
+									if(!empty($_GET["title"]) AND !preg_match("/" . $_GET["title"] . "/i", $mat["title"]))
+										continue;
+									if(!empty($_GET["time_start"]) AND strtotime($_GET["time_start"]) >= strtotime($mat["date"]))
+										continue;
+									if(!empty($_GET["time_end"]) AND strtotime($_GET["time_end"]) <= strtotime($mat["date"]))
+										continue;
+									
+								?>
+							
+								<div class="panel panel-default">
+									<div class="panel-heading red-heading">
+										<div class="row">
+											<div class="col-sm-9">
+												<h4 class="break-h"><?=$mat["title"]?></h4>
+												<h5 class="break-h"><?=$mat["subject"]?></h5>
+											</div>
+											<div class="col-sm-3">
+												<a href="transfer/?file_id=<?=$mat["file_id"]?>" class="btn btn-default center-block fixed-width"><i class="fa fa-link"></i>&nbsp;Download</a>
+												<?php
+												if($mat['uploader_id'] == $_SESSION['id'])
+													echo '<button class="btn btn-default delete center-block fixed-width" style="margin-top: 5px;" value=' . $mat['file_id'] . '><i class="fa fa-remove"></i>&nbsp;Delete</button>'
+												?>
+											</div>
+											
+										</div>
+										
+									</div>
+									<div class="panel-body">
+										<?php if(!empty($mat["comment"])) {
+											echo '<blockquote><p>' . $mat["comment"] . '</p></blockquote>';
+										}?>
+										
+										<p><span class="text-info">Filename:</span> <?=$mat['filename']?></p>
+										<p><span class="text-info">Author:</span> <?=$mat['author']?></p>
+										<p><span class="text-info">Size:</span> <?=formatBytes($mat['size'], 2)?></p>
+										
+										<hr />
+										<div class="pull-right">
+											<small>
+												<span class="glyphicon glyphicon-user"></span> <?=$mat["uploader"]?>
+												&nbsp;&nbsp;
+												<span class="glyphicon glyphicon-calendar"></span> <?=timeDifference($mat["date"])?>
+											</small>
+										</div>
+										
+									</div>
+								</div>
+								
+							<?php }
+						} else {
+							echo '<div class="alert alert-info"><p>Heads up! There are not materials to show.</p></div>';
+						}
 					?>
 				</div>
 				<div class="col-sm-4">
 					<div class="panel-group" role="tablist" id="accordion" aria-multiselectable="true">
 						<div class="panel panel-default">
-							<div class="panel-heading" id="sortHeading">
+							<div class="panel-heading red-heading" id="sortHeading">
 								<h4 class="panel-title">
 									<a data-toggle="collapse" data-parent="#accordion" href="#collapseSort" aria-expanded="true" aria-controls="collapseSort">
-										Sort
+										Filter <i class="fa fa-caret-down"></i>
 									</a>
 								</h4>
 							</div>
 							<div id="collapseSort" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="sortHeading">
 								<div class="panel-body">
-									<form class="form-horizontal" method="post" enctype="multipart/form-data">
+									<form class="form-horizontal">
 										<div class="form-group">
-											<label for='inSubjects' class="col-sm-3 control-label">Subject:</label>
+											<label for='sortTitle' class="col-sm-3 control-label">Title:</label>
 											<div class="col-sm-9">
-												<select class="form-control" id="inSubjects"  required>
+												<input type="text" id="sortTitle" class="form-control" name="title"></input>
+											</div>
+										</div>
+										<div class="form-group">
+											<label for='sortSubject' class="col-sm-3 control-label">Subject:</label>
+											<div class="col-sm-9">
+												<select class="form-control" id="sortSubject" name="subject"  required>
 													<?php
+														echo '<option value="0">None</option>';
 														foreach(GroupManager::getSubjects() as $sub)
 														echo '<option value="'. $sub["id"] .'">' . $sub["name"] . '</option>';
 													?>
 												</select>
 											</div>
 										</div>
+										<div class="form-group">
+											<label for="sortStart" class="col-sm-3 control-label">Start time: </label>
+											<div class="col-sm-9">
+												<div class="input-group date" id="timeStart">
+													<input type="text" id="sortStart" name="time_start" class="form-control"  data-date-format="YYYY-MM-DD"/>
+													<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+												</div>
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="sortEnd" class="col-sm-3 control-label">Start time: </label>
+											<div class="col-sm-9">
+												<div class="input-group date" id="timeEnd">
+													<input type="text" id="sortEnd" name="time_end" class="form-control"  data-date-format="YYYY-MM-DD"/>
+													<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+												</div>
+											</div>
+										</div>
 										
-										<input type="submit" class="btn btn-success pull-right" value="Do sort!"></input>										
+										<input type="submit" class="btn btn-success pull-right" name="filter" value="Do it!"></input>	
 									</form>
+									<button class="btn btn-primary pull-right" id="reset-btn" style="margin-right: 5px;">Reset</button>
 								</div>
 							</div>
 						</div>
 						<div class="panel panel-default">
-							<div class="panel-heading" id="uploadHeading">
+							<div class="panel-heading red-heading" id="uploadHeading">
 								<h4 class="panel-title">
 									<a data-toggle="collapse" data-parent="#accordion" href="#collapseUpload" aria-expanded="false" aria-controls="collapseUpload">
-										Upload
+										Upload <i class="fa fa-caret-down"></i>
 									</a>
 								</h4>
 							</div>
@@ -136,6 +232,7 @@
 					
 				</div>
 			</div>
+			
 		</div>
 		
 		<?php } else {
@@ -143,6 +240,9 @@
 		} ?>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+		
+		<script src="js/moment.js"></script>
+		<script src="js/bootstrap-datetimepicker.js"></script>		
 		
 		<script src="js/typeahead.bundle.min.js"></script>
 		
@@ -244,6 +344,50 @@
 				displayKey: 'value',
 				source: substringMatcher(members)
 			}); 
+		</script>
+		<script>
+			$("#clear-btn").hide();
+			<?php
+				if(!empty($_GET["title"])) {
+					echo '$("#sortTitle").val("' . $_GET["title"] . '");';
+					echo '$("#reset-btn").show();';
+				}
+				if(!empty($_GET["subject"])) {
+					echo '$("#sortSubject").val("' . $_GET["subject"] . '");';
+					echo '$("#reset-btn").show();';
+				}
+				if(!empty($_GET["time_start"])) {
+					echo '$("#sortStart").val("' . $_GET["time_start"] . '");';
+					echo '$("#reset-btn").show();';
+				}
+				if(!empty($_GET["time_end"])) {
+					echo '$("#sortEnd").val("' . $_GET["time_end"] . '");';
+					echo '$("#reset-btn").show();';
+				}
+			?>
+			
+			$('#reset-btn').click(function() {
+				 window.location.href = 'groups/materials.php';
+			});
+			
+			
+			$('.delete').click(function() {
+				$.ajax({
+					url: 'transfer/?file_id=' + $(this).val(),
+					type: 'DELETE',
+					success: function(result) {
+						window.location.href = 'groups/materials.php';
+					}
+				});
+			});
+			
+			$('#timeStart').datetimepicker({
+				pickTime: false
+			});
+			
+			$('#timeEnd').datetimepicker({
+				pickTime: false
+			});
 		</script>
 </body>
 </html>

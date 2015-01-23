@@ -33,7 +33,7 @@
 			
 			
 			<div class="container">
-				<div class="page-header">
+				<div class="page-header red-pageheader">
 					<h2>
 						<span><a href="groups"><?=$_SESSION["group_name"]?></a> <i class="fa fa-angle-right"></i> Schedule</span>
 
@@ -50,7 +50,7 @@
 					</div>
 					<div class="col-md-4">
 						<div class="panel panel-default" id="scheduleControl">
-							<div class="panel-heading" id="panelTitle">
+							<div class="panel-heading red-heading" id="panelTitle">
 								<span id="panelText">Class details</span>
 								<div class="pull-right">
 									<?php if(hasGroupFlag('a')) echo '<small><a class="white-link" id="remLink">Delete</a></small>' ?>
@@ -160,7 +160,7 @@
 						eventClick: function(callEvent, jsEvent, view) {
 							if(createMode == true) {
 								$("#panelText").text("Class details");
-								$("#panelTitle").attr("style", "background-color: #a6373f");
+								$("#panelTitle").attr("style", "background-color: #a6373f !important");
 								createMode = false;
 							}
 							$(".white-link").show();
@@ -209,7 +209,7 @@
 					createMode = true;
 					
 					$("#panelText").text("Add new class");
-					$("#panelTitle").attr("style", "background-color: #337ab7");
+					$("#panelTitle").attr("style", "background-color: #337ab7 !important");
 					$("#ctrlStart").val("08:00");
 					$("#ctrlEnd").val("08:50");
 					$("#hiddenID").val("-1");
