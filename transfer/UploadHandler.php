@@ -1189,7 +1189,7 @@ class UploadHandler
 		$stmt->fetch();
 		$stmt->close();
 		
-		$message = $_SESSION["name"] . " has added a new material for " . $subject . ": " . $original . ".";
+		$message = "empty";
 		$query = "INSERT INTO g_posts (group_id, user_id, file_id, text, date) 
 			VALUES (?, ?, LAST_INSERT_ID(), '" . $message . "' , NOW());";
 		$stmt = $conn->prepare($query);

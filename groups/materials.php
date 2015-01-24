@@ -11,12 +11,6 @@
 		<link rel="stylesheet" href="css/jquery.fileupload.css">
 		<link rel="stylesheet" href="css/styles.css">
 		
-		<style>
-			.fixed-width {
-			width:150px;
-			}
-		</style>
-		
 		<title> Materials </title>
 	</head>
 	<body>
@@ -64,11 +58,13 @@
 								continue;
 								if(!empty($_GET["time_end"]) AND strtotime($_GET["time_end"]) <= strtotime($mat["date"]))
 								continue;
+								if(!empty($_GET["file_id"]) AND $_GET["file_id"] != $mat["file_id"])
+								continue;
 								
 							?>
 							
 							<div class="panel panel-default">
-								<div class="panel-heading">
+								<div class="panel-heading red-heading">
 									<div class="row">
 										<div class="col-sm-9">
 											<h4 class="break-h"><?=$mat["title"]?></h4>
@@ -352,10 +348,10 @@
 			var members = [<?php
 				$members = GroupManager::getMembers();
 				
-				echo "'" . $members[0]->name . "'";
+				echo "'" . $members[0]["name"] . "'";
 				$len = count($members);
 				for($i = 1 ; $i < $len ; $i++)
-				echo ", '" . $members[$i]->name . "'";
+				echo ", '" . $members[$i]["name"] . "'";
 			?>
 			];
 			

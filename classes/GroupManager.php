@@ -192,7 +192,7 @@
 			if(!empty($_SESSION["group_id"])) {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			
-				$query = "SELECT g_posts.user_id, members.name, g_posts.text, g_posts.date, g_posts.file_id
+				$query = "SELECT g_posts.user_id, members.name, g_posts.text, g_posts.date, g_posts.file_id, g_posts.event_id
 				FROM g_posts
 				INNER JOIN members ON g_posts.user_id = members.user_id
 				WHERE group_id = ?
@@ -209,7 +209,7 @@
 				if(false === $ok)
 				die("Execute failed");
 				
-				$ok = $stmt->bind_result($user_id, $name, $text, $date, $file_id);
+				$ok = $stmt->bind_result($user_id, $name, $text, $date, $file_id, $event_id);
 				if(false === $ok)
 				die("bind_result failed");
 				
@@ -221,7 +221,8 @@
 									'name' => $name,
 									'text' => $text,
 									'date' => $date,
-									'file_id' => $file_id);
+									'file_id' => $file_id,
+									'event_id' => $event_id);
 				}
 				
 				$stmt->close();

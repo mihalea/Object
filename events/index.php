@@ -88,7 +88,7 @@
 			
 			
 			<?php
-				$manager->getEvents();
+				#$manager->getEvents();
 			?>			
 			
 			<form method="POST" name="removeForm">

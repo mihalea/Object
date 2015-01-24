@@ -18,14 +18,15 @@
 			require_once("../config/db.php");
 			require_once("../classes/Login.php");
 			require_once("../classes/GroupManager.php");
+			require_once("../classes/EventManager.php");
 			require_once("../classes/Helper.php");
 			
 			$login = new Login();
 			$manager = new GroupManager();
 			
 			if ($login->isLogged()) { 
-			include("../views/navbar.php"); 
-			
+				include("../views/navbar.php"); 
+				
 				if(isset($_GET["select"])) { ?>
 				
 				<div class="container">
@@ -37,7 +38,7 @@
 						
 						<div class="collapse" id="createGroupCollapse">
 							<br />
-						
+							
 							<form class="form-horizontal" id="createGroup" method="POST">
 								<div class="form-group">
 									<label for="inputName" class="col-sm-2 control-label">Name: </label>
@@ -51,17 +52,17 @@
 							</form>
 						</div>
 					</div>		
-
+					
 					<?php 
-					if (isset($_GET["error"]) AND $_GET["error"] == "create") {
-						echo '<div class="alert alert-danger""><p>Error! Failed to create new group</p></div>';
-					} elseif (isset($_GET["error"]) AND $_GET["error"] == "noAccess") {
-						echo '<div class="alert alert-danger""><p>Error! You don\'t have acces to that group.</p></div>';
-					} elseif(isset($_GET["error"]) AND $_GET["error"] == "set") {
-						echo '<div class="alert alert-danger""><p>Error! Failed to open that group</p></div>';
-					}
-	
-					GroupManager::printGroups();
+						if (isset($_GET["error"]) AND $_GET["error"] == "create") {
+							echo '<div class="alert alert-danger""><p>Error! Failed to create new group</p></div>';
+							} elseif (isset($_GET["error"]) AND $_GET["error"] == "noAccess") {
+							echo '<div class="alert alert-danger""><p>Error! You don\'t have acces to that group.</p></div>';
+							} elseif(isset($_GET["error"]) AND $_GET["error"] == "set") {
+							echo '<div class="alert alert-danger""><p>Error! Failed to open that group</p></div>';
+						}
+						
+						GroupManager::printGroups();
 					?>
 				</div>
 				
@@ -73,12 +74,12 @@
 				
 				<div class="container">
 					<div class="row">
-							<div class="page-header red-pageheader">
-								<h2>
-									<span><?= $_SESSION["group_name"] ?></span>
-									<button type="button" class="btn btn-primary pull-right" data-toggle="collapse" data-target="#newMessageCollapse" aria-expanded="false" aria-controls="newMessageCollapse"><span class="glyphicon glyphicon-pencil">&nbsp;</span>New post</button>
-								</h2>
-							</div>
+						<div class="page-header red-pageheader">
+							<h2>
+								<span><?= $_SESSION["group_name"] ?></span>
+								<button type="button" class="btn btn-primary pull-right" data-toggle="collapse" data-target="#newMessageCollapse" aria-expanded="false" aria-controls="newMessageCollapse"><span class="glyphicon glyphicon-pencil">&nbsp;</span>New post</button>
+							</h2>
+						</div>
 					</div>
 					<div class="row">
 						<div class="col-sm-9">
@@ -86,79 +87,99 @@
 								<form id="addEvent" method="POST">
 									<div class="form-group">
 										<label for="inputPost" class="control-label">Post: </label>
-										<textarea rows="4" id="inputPost" name="post" class="form-control"/></textarea>
+									<textarea rows="4" id="inputPost" name="post" class="form-control"/></textarea>
+								</div>
+								
+								<input type="submit" name="newPost" id="submit" class="btn btn-success pull-right"></input>
+								
+								<div class="clearfix"></div>
+							</form>
+							
+							<hr />
+						</div>
+						
+						<?php
+							if(isset($_GET["error"]) AND $_GET["error"] == "post") {
+								echo '<div class="alert alert-danger""><p>Error! Failed to post your message.</p></div>';
+							}
+							
+							$posts = GroupManager::getPosts();
+							
+							if(is_array($posts) AND count($posts) > 0) {
+								foreach($posts as $post) { ?>
+								<div class="panel panel-default">
+									<div class="panel-heading red-heading">
+										<h5><span class="glyphicon glyphicon-user"></span>&nbsp;
+											<?php
+												echo $post["name"];
+												if(!empty($post["file_id"])) {
+													echo ' uploaded a file';
+													echo '<div class="pull-right top-buttons">
+													<a href="groups/materials.php?file_id=' . $post["file_id"] . '" class="btn btn-default fixed-width"><i class="fa fa-external-link"></i>&nbsp;View file</a>
+													</div>';
+												} elseif(!empty($post["event_id"])) {
+													echo ' created a new event';
+													echo '<div class="pull-right top-buttons">
+													<a href="groups/events.php?event_id=' . $post["event_id"] . '" class="btn btn-default fixed-width"><i class="fa fa-external-link"></i>&nbsp;View event</a>
+													</div>';
+												}
+												
+											?>
+											<!--<div class="pull-right">
+												<span class="glyphicon glyphicon-remove"></span>
+											</div>-->
+										</h5>
 									</div>
 									
-									<input type="submit" name="newPost" id="submit" class="btn btn-success pull-right"></input>
-									
-									<div class="clearfix"></div>
-								</form>
-								
-								<hr />
-							</div>
-							
-							<?php
-								if(isset($_GET["error"]) AND $_GET["error"] == "post") {
-									echo '<div class="alert alert-danger""><p>Error! Failed to post your message.</p></div>';
-								}
-							
-								$posts = GroupManager::getPosts();
-								
-								if(is_array($posts) AND count($posts) > 0) {
-									foreach($posts as $post) { ?>
-										<div class="panel panel-default">
-											<div class="panel-heading">
-												<h5><span class="glyphicon glyphicon-user"></span>&nbsp;
-												<?php
-													echo $post["name"];
-													if(!empty($post["file_id"])) {
-														echo ' uploaded a file';
-														echo '<div class="pull-right top-buttons">
-																	<a href="transfer/?file_id=' . $post["file_id"] . '" class="btn btn-primary"><i class="fa fa-link"></i>&nbsp;Download</a>
-															  </div>';
-													}
-													
-												?>
-													<!--<div class="pull-right">
-														<span class="glyphicon glyphicon-remove"></span>
-													</div>-->
-												</h5>
-											</div>
-											
-											<div class="panel-body">
-												<?=$post["text"]?>
-											</div>
-											<div class="panel-footer">
-												<small class="pull-right">
-													<small><span class="glyphicon glyphicon-calendar"></span>&nbsp;
-														<?=timeDifference($post["date"])?> </small>
-												</small>
-												<div class="clearfix"></div>
-											</div>
-										</div>
-									<?php }
-								}
-							?>
+									<div class="panel-body">
+										<?=$post["text"]?>
+									</div>
+									<div class="panel-footer">
+										<small class="pull-right">
+											<small><span class="glyphicon glyphicon-calendar"></span>&nbsp;
+											<?=timeDifference($post["date"])?> </small>
+										</small>
+										<div class="clearfix"></div>
+									</div>
+								</div>
+								<?php }
+							}
+						?>
+					</div>
+					<div class="col-sm-3">
+						
+						<div class="list-group">
+							<span class="list-group-item red-heading">Dashboard</span>
+							<a href="groups/schedule.php" class="list-group-item">Schedule</a>
+							<a href="groups/events.php" class="list-group-item">Events</a>
+							<a href="groups/materials.php" class="list-group-item">Materials</a>
+							<a href="#" class="list-group-item">Members</a>
 						</div>
-						<div class="col-sm-3">
-
-							<div class="list-group">
-								<span class="list-group-item red-heading">Dashboard</span>
-								<a href="groups/schedule.php" class="list-group-item">Schedule</a>
-								<a href="groups/events.php" class="list-group-item">Events</a>
-								<a href="groups/materials.php" class="list-group-item">Materials</a>
-								<a href="#" class="list-group-item">Members</a>
-							</div>
-						</div>
+						
+						<?php 
+							$events = EventManager::getEvents(7, 10);
+							if(is_array($events) AND count($events) > 0) { ?>
+									<div class="list group">
+										<span class="list-group-item red-heading">Upcoming events</span>										
+										<?php
+											foreach($events as $e) {
+												echo '<a href="groups/events.php?id=' . $e["id"] . '" class="list-group-item"> '
+													. substr($e["title"], 0, 15) , (strlen($e["title"]) > 15 ? "..." : "") . 
+													'<span class="badge">' . timeDifference($e["date"]) . '</span></a>';
+											}
+										?>
+									</div>
+							<?php } ?>
 					</div>
 				</div>
-		
-		
-		
+			</div>
+			
+			
+			
 		<?php } } else { ?>
 		NOT LOGGED IN!
-		<?php } ?>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-	</body>
+	<?php } ?>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+</body>
 </html>

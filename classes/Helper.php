@@ -1,37 +1,48 @@
 <?php
 	function timeDifference($time) 
 	{
-		date_default_timezone_set("Europe/Bucharest");
 		$timeNow = time();
 		$timePost = strtotime($time);
 		
 		
 		$time = $timeNow - $timePost;
+		if($time<0) {
+			$time = -$time;
+		} else {
+			$suffix = " ago";
+		}
+		
 		
 		$time = $time / 60; #minutes
+		$out = "";
 		if( $time < 60 ) {
 			$time = round($time);
 			
 			if($time == 1)
-			return $time . ' minute ago';
+			$out = $time . ' minute';
 			else
-			return $time . ' minutes ago';
+			$out = $time . ' minutes';
 			} else {
 			$time = $time / 60; #hours
 			if ( $time < 24 ) {
 				$time = round($time);
 				if($time == 1)
-				return $time . ' hour ago';
+				$out = $time . ' hour';
 				else
-				return $time . ' hours ago';
+				$out = $time . ' hours';
 				} else {
 				$time = round($time / 24); #days
 				if($time == 1)
-				return $time . ' day ago';
+				$out = $time . ' day';
 				else
-				return $time . ' days ago';
+				$out = $time . ' days';
 			}
 		}
+		
+		if(!empty($suffix))
+			$out = $out . $suffix;
+			
+		return $out;
 	}	
 	
 	function formatBytes($bytes, $precision = 2) { 
@@ -46,4 +57,4 @@
 		$bytes /= (1 << (10 * $pow)); 
 		
 		return round($bytes, $precision) . ' ' . $units[$pow]; 
-	} 	
+	} 		

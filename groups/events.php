@@ -218,6 +218,30 @@
 					columnFormat: 'dddd',
 					//header: '',
 					aspectRatio: 1.55,
+					loading: function(isLoading, view) {
+						<?php
+						if(!empty($_GET["event_id"])) { ?>
+						if(!isLoading) {
+							var events = $("#calendar").fullCalendar('clientEvents', <?=$_GET["event_id"]?>);
+							$.each(events, function (index, e) {
+									$('#panel_details').show();
+								$('#collapseAdd').collapse('hide');
+								$('#collapseDetails').collapse('show');
+								
+								$('#d_name').val(e["title"]);
+								$('#d_location').val(e["location"]);
+								$('#d_date').val(e["date"]);
+								$('#d_start').val(e["start"]);
+								$('#d_end').val(e["end"]);
+								$('#d_comment').val(e["comment"]);
+							});
+							
+							
+						}
+					
+					<?php } ?>
+						
+					},
 					eventClick: function(callEvent, jsEvent, view) {				
 						$('#panel_details').show();
 						$('#collapseAdd').collapse('hide');
@@ -231,7 +255,6 @@
 						$('#d_comment').val(callEvent["comment"]);
 					}
 				})
-				
 			});
 			
 			$('#addHeading').click(function() {

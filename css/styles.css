@@ -38,6 +38,10 @@
 	border-bottom: 1px solid #ccc;
 }
 
+.fixed-width {
+	width:150px;
+}
+
 div.no-margin {
 	margin: 0px;
 	height: 30px;
