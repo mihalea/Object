@@ -145,6 +145,7 @@
 							<div class="list-group">
 								<span class="list-group-item red-heading">Dashboard</span>
 								<a href="groups/schedule.php" class="list-group-item">Schedule</a>
+								<a href="groups/events.php" class="list-group-item">Events</a>
 								<a href="groups/materials.php" class="list-group-item">Materials</a>
 								<a href="#" class="list-group-item">Members</a>
 							</div>

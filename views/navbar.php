@@ -23,13 +23,13 @@ $root = "//localhost/test/";
 				<li <?php if ($page == $root . "index.php") echo ' class="active"'?>>
 					<a href=<?=$root?>>Frontpage</a>
 				</li>
-				<li <?php if (preg_match('/groups/', $page)) echo ' class="active"'?>>
+				<li <?php if (preg_match('/test\/groups/', $page)) echo ' class="active"'?>>
 					<a href=<?=$root, "groups?select"?>>Groups</a>
 				</li>
-				<li <?php if (preg_match('/events/', $page)) echo ' class="active"'?>>
+				<li <?php if (preg_match('/test\/events/', $page)) echo ' class="active"'?>>
 					<a href=<?=$root, "events"?>>Events</a>
 				</li>
-				<li <?php if (preg_match('/grades/', $page)) echo ' class="active"'?>>
+				<li <?php if (preg_match('/test\/grades/', $page)) echo ' class="active"'?>>
 					<a href=<?=$root, "grades"?>>Grades</a>
 				</li>
 			</ul>

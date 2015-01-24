@@ -32,50 +32,43 @@
 		{	
 			if(empty($_POST["name"])) {
 				$this->errors[] = "Empty name";
-			}
-			elseif(empty($_POST["date"])) {
+			} elseif(empty($_POST["date"])) {
 				$this->errors[] = "Empty date";
-			}
-			elseif(!preg_match('/\d{4}-\d{2}-\d{2}/', $_POST["date"])) {
+			} elseif(!preg_match('/\d{4}-\d{2}-\d{2}/', $_POST["date"])) {
 				$this->errors[] = "Invalid date";
-			}
-			else 
-			{
+			} else {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 				
 				
-				if($conn->connect_error) {
-					$this->errors[] = "Failed to connect to database at addEvent: " . $conn->connect_error;
-					return false;
-				}
+				if($conn->connect_error)
+					die("Failed to connect to database at addEvent: " . $conn->connect_error);
+
 				
-				if(!isset($_SESSION["id"])) {
-					$this->errors[] = "Failed to get session id";
-					return false;
-				}
+				if(!isset($_SESSION["id"]))
+					die("Failed to get session id");
+
 				
-				$name = $_POST["name"];
+				$group_id = isset($_POST["group"]) ? $_SESSION["group_id"] : null;
+				$user_id = $_SESSION["id"];
+				$name = strip_tags($_POST["name"]);
+				$location = isset($_POST["location"]) ? strip_tags($_POST["location"]) : null;
 				$date = date('Y-m-d H:i:s', strtotime($_POST["date"]));
-				$comment = $_POST["comment"];
+				$start = isset($_POST["start"]) ? date('H:i', strtotime($_POST["start"])) : null;
+				$end = isset($_POST["end"]) ? date('H:i', strtotime($_POST["end"])) : null;
+				$comment = isset($_POST["comment"]) ? strip_tags($_POST["comment"]) : null;
 				
-				$stmt = $conn->prepare("INSERT INTO events (user_id, name, date, comment)
-				VALUES (?, ?, ?, ?);");
-				if(false === $stmt) {
-					$this->errors[] = "Failed to prepare at addEvent: " . $conn->connect_error;
-					return false;
-				}
+				$stmt = $conn->prepare("INSERT INTO events (group_id, user_id, name, location, date, start, end, comment)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
+				if(false === $stmt)
+					die("Failed to prepare at addEvent: " . $conn->connect_error);
 				
-				$code = $stmt->bind_param("isss", $_SESSION["id"], $name, $date, $comment);
-				if(false === $code) {
-					$this->errors[] = "Failed to bind params at addEvent";
-					return false;
-				}
+				$code = $stmt->bind_param("iissssss", $group_id, $user_id, $name, $location, $date, $start, $end, $comment);
+				if(false === $code)
+					die("Failed to bind params at addEvent");
 				
 				$ok = $stmt->execute();
-				if(false === $ok) {
-					$this->errors[] = "Failed to execute at addEvent";
-					return false;
-				}
+				if(false === $ok)
+					die("Failed to execute at addEvent");
 				
 				$stmt->close();
 				$conn->close();
@@ -150,6 +143,10 @@
 			$query = "SELECT name, date, comment, event_id
 			FROM events
 			WHERE user_id = ?";
+			
+			if(empty($_POST["group"])) {
+				$query = $query . " AND group_id IS NULL";
+			}
 			if(!isset($_GET["all"])) {
 				$query = $query . " AND date >= curdate()";
 			}

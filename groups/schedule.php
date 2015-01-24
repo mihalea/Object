@@ -5,7 +5,7 @@
 		
 		<base href="//localhost/test/">
 			
-		<!-- Latest compiled and minified CSS -->
+			<!-- Latest compiled and minified CSS -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="css/fullcalendar.min.css">
@@ -139,14 +139,8 @@
 					var y = date.getYear();
 					
 					$('#schedule').fullCalendar({
-						// put your options and callbacks here
-						header: {
-							left: '',
-							center: 'title',
-							right: ''
-						},
 						//editable: true,
-						events: "<?=SITE_ROOT, "groups/json.php"?>",
+						events: "<?=SITE_ROOT, "groups/json.php?schedule"?>",
 						eventLimit: true, 
 						defaultView: 'agendaWeek',
 						eventColor: '#a6373f',

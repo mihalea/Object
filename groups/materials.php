@@ -13,7 +13,7 @@
 		
 		<style>
 			.fixed-width {
-				width:150px;
+			width:150px;
 			}
 		</style>
 		
@@ -40,7 +40,7 @@
 					<span><a href="groups"><?=$_SESSION["group_name"]?></a> <i class="fa fa-angle-right"></i> </span> Materials</span>
 				</h2>
 				
-			</div>
+				</div>
 			
 			<div class="row">
 				<div class="col-sm-8">
@@ -48,70 +48,70 @@
 						if (isset($_GET["success"])) {
 							echo '<div class="alert alert-success"><p>Success! The material has been added to this group.</p></div>';
 						}
-
-												
+						
+						
 						$materials = GroupManager::getMaterials();
 						if(is_array($materials) AND count($materials) > 0) {
 							foreach($materials as $mat) { 
 								
-									
 								
-									if(!empty($_GET["subject"]) AND$_GET["subject"] != 0 AND $_GET["subject"] != $mat["subject_id"])
-										continue;
-									if(!empty($_GET["title"]) AND !(preg_match("/" . $_GET["title"] . "/i", $mat["title"]) OR preg_match("/" . $_GET["title"] . "/i", $mat["filename"])))
-										continue;
-									if(!empty($_GET["time_start"]) AND strtotime($_GET["time_start"]) >= strtotime($mat["date"]))
-										continue;
-									if(!empty($_GET["time_end"]) AND strtotime($_GET["time_end"]) <= strtotime($mat["date"]))
-										continue;
-									
-								?>
+								
+								if(!empty($_GET["subject"]) AND$_GET["subject"] != 0 AND $_GET["subject"] != $mat["subject_id"])
+								continue;
+								if(!empty($_GET["title"]) AND !(preg_match("/" . $_GET["title"] . "/i", $mat["title"]) OR preg_match("/" . $_GET["title"] . "/i", $mat["filename"])))
+								continue;
+								if(!empty($_GET["time_start"]) AND strtotime($_GET["time_start"]) >= strtotime($mat["date"]))
+								continue;
+								if(!empty($_GET["time_end"]) AND strtotime($_GET["time_end"]) <= strtotime($mat["date"]))
+								continue;
+								
+							?>
 							
-								<div class="panel panel-default">
-									<div class="panel-heading">
-										<div class="row">
-											<div class="col-sm-9">
-												<h4 class="break-h"><?=$mat["title"]?></h4>
-												<h5 class="break-h"><?=$mat["subject"]?></h5>
-											</div>
-											<div class="col-sm-3">
-												<a href="transfer/?file_id=<?=$mat["file_id"]?>" class="btn btn-default center-block fixed-width"><i class="fa fa-link"></i>&nbsp;Download</a>
-												<?php
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<div class="row">
+										<div class="col-sm-9">
+											<h4 class="break-h"><?=$mat["title"]?></h4>
+											<h5 class="break-h"><?=$mat["subject"]?></h5>
+										</div>
+										<div class="col-sm-3">
+											<a href="transfer/?file_id=<?=$mat["file_id"]?>" class="btn btn-default center-block fixed-width"><i class="fa fa-link"></i>&nbsp;Download</a>
+											<?php
 												if($mat['uploader_id'] == $_SESSION['id'])
-													echo '<button class="btn btn-default delete center-block fixed-width" style="margin-top: 5px;" value=' . $mat['file_id'] . '><i class="fa fa-remove"></i>&nbsp;Delete</button>'
-												?>
-											</div>
-											
+												echo '<button class="btn btn-default delete center-block fixed-width" style="margin-top: 5px;" value=' . $mat['file_id'] . '><i class="fa fa-remove"></i>&nbsp;Delete</button>'
+											?>
 										</div>
 										
 									</div>
-									<div class="panel-body">
-										<?php if(!empty($mat["comment"])) {
-											echo '<blockquote><p>' . $mat["comment"] . '</p></blockquote>';
-										}?>
-										
-										<p><span class="text-info">Filename:</span> <?=$mat['filename']?></p>
-										<p><span class="text-info">Author:</span> <?=$mat['author']?></p>
-										<p><span class="text-info">Size:</span> <?=formatBytes($mat['size'], 2)?></p>
-										
-										<hr />
-										<div class="pull-right">
-											<small>
-												<span class="glyphicon glyphicon-user"></span> <?=$mat["uploader"]?>
-												&nbsp;&nbsp;
-												<span class="glyphicon glyphicon-calendar"></span> <?=timeDifference($mat["date"])?>
-											</small>
-										</div>
-										
-									</div>
+									
 								</div>
-								
+								<div class="panel-body">
+									<?php if(!empty($mat["comment"])) {
+										echo '<blockquote><p>' . $mat["comment"] . '</p></blockquote>';
+									}?>
+									
+									<p><span class="text-info">Filename:</span> <?=$mat['filename']?></p>
+									<p><span class="text-info">Author:</span> <?=$mat['author']?></p>
+									<p><span class="text-info">Size:</span> <?=formatBytes($mat['size'], 2)?></p>
+									
+									<hr />
+									<div class="pull-right">
+										<small>
+											<span class="glyphicon glyphicon-user"></span> <?=$mat["uploader"]?>
+											&nbsp;&nbsp;
+											<span class="glyphicon glyphicon-calendar"></span> <?=timeDifference($mat["date"])?>
+										</small>
+									</div>
+									
+								</div>
+							</div>
+							
 							<?php }
-						} else {
+							} else {
 							echo '<div class="alert alert-info"><p>Heads up! There are not materials to show.</p></div>';
 						}
 					?>
-				</div>
+					</div>
 				<div class="col-sm-4">
 					<div class="panel-group" role="tablist" id="accordion" aria-multiselectable="true">
 						<div class="panel panel-default">
@@ -144,20 +144,20 @@
 											</div>
 										</div>
 										<div class="form-group">
-											<label for="sortStart" class="col-sm-3 control-label">Start time: </label>
+											<label for="sortStart" class="col-sm-3 control-label">Start:</label>
 											<div class="col-sm-9">
 												<div class="input-group date" id="timeStart">
 													<input type="text" id="sortStart" name="time_start" class="form-control"  data-date-format="YYYY-MM-DD"/>
-													<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+													<span class="input-group-addon"><span class="glyphicon glyphicon-time"></span></span>
 												</div>
 											</div>
 										</div>
 										<div class="form-group">
-											<label for="sortEnd" class="col-sm-3 control-label">End time: </label>
+											<label for="sortEnd" class="col-sm-3 control-label">End: </label>
 											<div class="col-sm-9">
 												<div class="input-group date" id="timeEnd">
 													<input type="text" id="sortEnd" name="time_end" class="form-control"  data-date-format="YYYY-MM-DD"/>
-													<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+													<span class="input-group-addon"><span class="glyphicon glyphicon-time"></span></span>
 												</div>
 											</div>
 										</div>
@@ -218,8 +218,8 @@
 												<span id="inFile" class="form-control">None</span>
 											</div>
 										</div>
-
-																				
+										
+										
 										<div class="pull-right">
 											<div class="btn btn-primary fileinput-button">
 												<i class="glyphicon glyphicon-plus"></i>
@@ -288,7 +288,7 @@
 						progress + '%'
 						);
 					}
-				}).on('fileuploadadd', function (e, data) {
+					}).on('fileuploadadd', function (e, data) {
 					$.each(data.files, function (index, file) {
 						$('#inFile').text(file.name);
 						$('#upload').removeAttr('disabled');
@@ -392,7 +392,7 @@
 			?>
 			
 			$('#reset-btn').click(function() {
-				 window.location.href = 'groups/materials.php';
+				window.location.href = 'groups/materials.php';
 			});
 			
 			

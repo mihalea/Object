@@ -21,8 +21,12 @@
 }
 
 .red-heading {
-	background-color:#7c151d !important;
+	background-color:#a6373f !important;
 	color: #ecf0f1 !important;
+}
+
+.readonly {
+	background-color:#fff !important;
 }
 
 .date-control {
