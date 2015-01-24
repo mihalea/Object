@@ -16,6 +16,10 @@
 	word-wrap: break-word;
 }
 
+.red-footer {
+	background-color: #e9e6e6;
+}
+
 .red-heading {
 	background-color:#7c151d !important;
 	color: #ecf0f1 !important;

@@ -35,7 +35,7 @@
 					return false;
 				}
 				
-				$stmt = $connection->prepare("SELECT user_id, username, email, password
+				$stmt = $connection->prepare("SELECT user_id, username, name, email, password
 				FROM members
 				WHERE username = ? OR email = ?
 				LIMIT 1;");
@@ -46,9 +46,9 @@
 				}
 				
 				
-				$uname = $_POST["u"];
+				$user = $_POST["u"];
 				
-				$ok = $stmt->bind_param("ss", $uname, $uname);
+				$ok = $stmt->bind_param("ss", $user, $user);
 				if(false === $ok)
 				{
 					$this->errors[] = "Failed to bind params at login";
@@ -62,7 +62,7 @@
 					return false;
 				}
 				
-				$ok = $stmt->bind_result($id, $username, $email, $password);
+				$ok = $stmt->bind_result($id, $username, $name, $email, $password);
 				if(false === $ok)
 				{
 					$this->errors[] = "Failed to bind result at login";
@@ -81,8 +81,9 @@
 				
 				if(password_verify($_POST["p"], $password))
 				{
-					$_SESSION["uname"] = $username;
+					$_SESSION["user"] = $username;
 					$_SESSION["email"] = $email;
+					$_SESSION["name"] = $name;
 					$_SESSION["id"] = $id;
 					$_SESSION["isLogged"] = 1;
 					return true;

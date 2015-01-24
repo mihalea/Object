@@ -37,7 +37,7 @@ $root = "//localhost/test/";
 				<ul class="nav navbar-nav navbar-right">
 						
 						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-user">&nbsp;</span><?php echo $_SESSION["uname"]; ?><span class="caret"></span></a>
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-user">&nbsp;</span><?php echo $_SESSION["name"]; ?><span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">
 								<li><a href="index.php?logout"><span class="glyphicon glyphicon-log-out">&nbsp;</span>Logout</a></li>
 							</ul>

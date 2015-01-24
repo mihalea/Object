@@ -1122,7 +1122,7 @@ class UploadHandler
     }
 
 		
-	protected function generate_unique_filename($uploaded_file, $name, $size, $type, $error, $index, $content_range)
+	protected function addToDatabase($original, $unique, $size)
 	{
 		if(empty($_POST["title"]) OR empty($_POST["subject"]) OR empty($_POST["author"]))
 			die("POST not filled");
@@ -1149,18 +1149,54 @@ class UploadHandler
 		$stmt->fetch();
 		$stmt->close();
 		
+		if(empty($author_id))
+			$author_id = $_SESSION["id"];
+		
 		$query = "INSERT INTO files (filename, original_name, size, group_id, user_id, title, subject_id, author_id, comment, date) 
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW());";
 		$stmt = $conn->prepare($query);
 		if(false === $stmt)
 		die("Prepare failed");
 		
-		$unique = $this->get_file_name($uploaded_file, $name, $size, $type, $error, $index, $content_range);
-		$original = $this->trim_file_name($uploaded_file, $name, $size, $type, $error, $index, $content_range);
-
-		
 		$ok = $stmt->bind_param("ssiiisiis", $unique, $original, $size, $_SESSION["group_id"], $_SESSION["id"], $_POST["title"],
 										$_POST["subject"], $author_id, $_POST["comment"]);
+		if(false === $ok)
+		die("bind_param failed");
+		
+		$ok = $stmt->execute();
+		if(false === $ok)
+		die("Execute failed");
+		
+		$stmt->close();
+		
+		$query = "SELECT name FROM subjects WHERE subject_id = ?;";
+		$stmt = $conn->prepare($query);
+		if(false === $stmt)
+		die("Prepare failed");
+		
+		$ok = $stmt->bind_param("s", $_POST["subject"]);
+		if(false === $ok)
+		die("bind_param failed");
+		
+		$ok = $stmt->execute();
+		if(false === $ok)
+		die("Execute failed");
+		
+		$ok = $stmt->bind_result($subject);
+		if(false === $ok)
+			die("Bind result failed");
+			
+		$stmt->fetch();
+		$stmt->close();
+		
+		$message = $_SESSION["name"] . " has added a new material for " . $subject . ": " . $original . ".";
+		$query = "INSERT INTO g_posts (group_id, user_id, file_id, text, date) 
+			VALUES (?, ?, LAST_INSERT_ID(), '" . $message . "' , NOW());";
+		$stmt = $conn->prepare($query);
+		if(false === $stmt)
+		die("Prepare failed");
+		
+		$ok = $stmt->bind_param("ii", $_SESSION["group_id"], $_SESSION["id"]);
 		if(false === $ok)
 		die("bind_param failed");
 		
@@ -1174,8 +1210,8 @@ class UploadHandler
     protected function handle_file_upload($uploaded_file, $name, $size, $type, $error,
             $index = null, $content_range = null) {
         $file = new \stdClass();
-		$file->name = $this->generate_unique_filename($uploaded_file, $name, $size, $type, $error, $index, $content_range);
-        //$file->name = $this->get_file_name($uploaded_file, $name, $size, $type, $error, $index, $content_range);
+		//$file->name = $this->generate_unique_filename($uploaded_file, $name, $size, $type, $error, $index, $content_range);
+        $file->name = $this->get_file_name($uploaded_file, $name, $size, $type, $error, $index, $content_range);
         $file->size = $this->fix_integer_overflow((int)$size);
         $file->type = $type;
         if ($this->validate($uploaded_file, $file, $error, $index)) {
@@ -1219,6 +1255,8 @@ class UploadHandler
                     $file->error = $this->get_error_message('abort');
                 }
             }
+			
+			$this->addToDatabase($name, $file->name, $file->size);
             $this->set_additional_file_properties($file);
         }
         return $file;

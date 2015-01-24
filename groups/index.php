@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		
+		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 		<link rel="stylesheet" href="../css/styles.css">
 		
@@ -17,6 +18,7 @@
 			require_once("../config/db.php");
 			require_once("../classes/Login.php");
 			require_once("../classes/GroupManager.php");
+			require_once("../classes/Helper.php");
 			
 			$login = new Login();
 			$manager = new GroupManager();
@@ -103,18 +105,38 @@
 								$posts = GroupManager::getPosts();
 								
 								if(is_array($posts) AND count($posts) > 0) {
-									foreach($posts as $post) {
-										echo '<div class="panel panel-default post"><div class="panel-body">';
-										echo '<div class="pull-right"><span class="glyphicon glyphicon-remove"></span></div><br />';
-										echo $post->text;
-										echo '<hr />';
-										echo '<div class="pull-right"><small>';
-										echo '<span class="glyphicon glyphicon-user"></span>&nbsp;'
-											. $post->user->name . '&nbsp;&nbsp;';
-										echo '<span class="glyphicon glyphicon-calendar"></span>&nbsp;'
-											. $post->getTimeAgo() . '</small></div>';
-										echo '</div></div>';
-									}
+									foreach($posts as $post) { ?>
+										<div class="panel panel-default">
+											<div class="panel-heading">
+												<h5><span class="glyphicon glyphicon-user"></span>&nbsp;
+												<?php
+													echo $post["name"];
+													if(!empty($post["file_id"])) {
+														echo ' uploaded a file';
+														echo '<div class="pull-right top-buttons">
+																	<a href="transfer/?file_id=' . $post["file_id"] . '" class="btn btn-primary"><i class="fa fa-link"></i>&nbsp;Download</a>
+															  </div>';
+													}
+													
+												?>
+													<!--<div class="pull-right">
+														<span class="glyphicon glyphicon-remove"></span>
+													</div>-->
+												</h5>
+											</div>
+											
+											<div class="panel-body">
+												<?=$post["text"]?>
+											</div>
+											<div class="panel-footer">
+												<small class="pull-right">
+													<small><span class="glyphicon glyphicon-calendar"></span>&nbsp;
+														<?=timeDifference($post["date"])?> </small>
+												</small>
+												<div class="clearfix"></div>
+											</div>
+										</div>
+									<?php }
 								}
 							?>
 						</div>

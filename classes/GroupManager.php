@@ -192,7 +192,7 @@
 			if(!empty($_SESSION["group_id"])) {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			
-				$query = "SELECT g_posts.user_id, members.username, g_posts.text, g_posts.date
+				$query = "SELECT g_posts.user_id, members.name, g_posts.text, g_posts.date, g_posts.file_id
 				FROM g_posts
 				INNER JOIN members ON g_posts.user_id = members.user_id
 				WHERE group_id = ?
@@ -209,14 +209,19 @@
 				if(false === $ok)
 				die("Execute failed");
 				
-				$ok = $stmt->bind_result($user_id, $username, $text, $date);
+				$ok = $stmt->bind_result($user_id, $name, $text, $date, $file_id);
 				if(false === $ok)
 				die("bind_result failed");
 				
 				$posts = array();
 				while($stmt->fetch())
 				{
-					$posts[] = new Post(new User($user_id, $username), $text, $date);
+					$posts[] = array(
+									'user_id' => $user_id,
+									'name' => $name,
+									'text' => $text,
+									'date' => $date,
+									'file_id' => $file_id);
 				}
 				
 				$stmt->close();
@@ -253,7 +258,8 @@
 				$members = array();
 				while($stmt->fetch())
 				{
-					$members[] = new User($user_id, $name);
+					$members[] = array ( 'user_id' => $user_id,
+										 'name' => $name );
 				}
 				
 				$stmt->close();
@@ -393,32 +399,5 @@
 			
 			return $subjects;
 		}
-	}
-	
-	class User {
-		public $name;
-		public $id;
-		
-		public function __construct($id, $name) {
-			$this->name = $name;
-			$this->id = $id;
-		}
-	}
-	
-	class Post {
-		public $user;
-		public $text;
-		public $datetime;
-		
-		public function __construct($user, $text, $datetime) {
-			$this->user = $user;
-			$this->text = $text;
-			$this->datetime = $datetime;
-		}
-		
-		public function getTimeAgo() {
-			return timeDifference($this->datetime);
-		}
-	}
-	
+	}	
 ?>

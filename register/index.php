@@ -1,10 +1,10 @@
 <?php
-require_once("classes/Register.php");
+require_once("../classes/Register.php");
 
 $register = new Register();
 
 if($register->errors)
-	foreach($register->errors as $error)
+foreach($register->errors as $error)
 		echo $error;
 ?>
 <html>
@@ -12,22 +12,26 @@ if($register->errors)
 <head>
 	<meta charset="utf-8">
 	
+	<base href="//localhost/test/">	
+	
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
 	
 	<title>Register</title>
-	
-	<base href="//localhost/test/">
+
 </head>
 
 <body>
 	<div class="container form-div">
-		<form method="post" action="register.php" class="form-signin">
+		<form method="post" class="form-signin">
 		
 			<h2 class="form-signin-header">Register</h2>
 
 			<label for="username" class="sr-only">Username</label>
-			<input type="text" id="username" name="uname" placeholder="Username" class="form-control top" pattern="[a-zA-Z0-9]{6,64}" required />
+			<input type="text" id="username" name="user" placeholder="Username" class="form-control top" pattern="[a-zA-Z0-9_]{6,64}" required />
+			
+			<label for="name" class="sr-only">Name</label>
+			<input type="text" id="name" name="name" placeholder="Name" class="form-control top" pattern="[a-zA-Z0-9]{6,64}" required />
 			
 			<label for="email" class="sr-only">Email</label>
 			<input type="text" id="email" name="email" placeholder="Email" class="form-control middle" pattern=".{6,64}" required />

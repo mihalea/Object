@@ -58,7 +58,7 @@
 								
 									if(!empty($_GET["subject"]) AND$_GET["subject"] != 0 AND $_GET["subject"] != $mat["subject_id"])
 										continue;
-									if(!empty($_GET["title"]) AND !preg_match("/" . $_GET["title"] . "/i", $mat["title"]))
+									if(!empty($_GET["title"]) AND !(preg_match("/" . $_GET["title"] . "/i", $mat["title"]) OR preg_match("/" . $_GET["title"] . "/i", $mat["filename"])))
 										continue;
 									if(!empty($_GET["time_start"]) AND strtotime($_GET["time_start"]) >= strtotime($mat["date"]))
 										continue;
@@ -68,7 +68,7 @@
 								?>
 							
 								<div class="panel panel-default">
-									<div class="panel-heading red-heading">
+									<div class="panel-heading">
 										<div class="row">
 											<div class="col-sm-9">
 												<h4 class="break-h"><?=$mat["title"]?></h4>
@@ -153,7 +153,7 @@
 											</div>
 										</div>
 										<div class="form-group">
-											<label for="sortEnd" class="col-sm-3 control-label">Start time: </label>
+											<label for="sortEnd" class="col-sm-3 control-label">End time: </label>
 											<div class="col-sm-9">
 												<div class="input-group date" id="timeEnd">
 													<input type="text" id="sortEnd" name="time_end" class="form-control"  data-date-format="YYYY-MM-DD"/>
@@ -178,7 +178,7 @@
 							</div>
 							<div id="collapseUpload" class="panel-collapse collapse" role="tabpanel" aria-labelledby="uploadHeading">
 								<div class="panel-body">
-									<form class="form-horizontal" method="post" enctype="multipart/form-data">
+									<form class="form-horizontal" method="POST" enctype="multipart/form-data">
 										<div class="form-group">
 											<label for='inTitle' class="col-sm-3 control-label">Title:</label>
 											<div class="col-sm-9">
@@ -208,7 +208,7 @@
 										<div class="form-group">
 											<label for="inComment" class="col-sm-3 control-label">Comment: </label>
 											<div class="col-sm-9">
-												<textarea rows="3" id="inComment" name="comment" class="form-control" required></textarea>
+												<textarea rows="3" id="inComment" name="comment" class="form-control"></textarea>
 											</div>
 										</div>
 										
@@ -221,14 +221,13 @@
 
 																				
 										<div class="pull-right">
-											<span class="btn btn-primary fileinput-button">
+											<div class="btn btn-primary fileinput-button">
 												<i class="glyphicon glyphicon-plus"></i>
 												<span>Select file</span>
-												<input id="fileupload" type="file" name="files[]" required>
-												
-											</span>
+												<input id="fileupload" type="file" name="files[]"/>
+											</div>
 											
-											<input type="submit" class="btn btn-success" value="Upload" id="upload" disabled="disabled">
+											<button class="btn btn-success" id="upload" disabled="disabled" >Upload</button>
 										</div>
 										
 									</form>
@@ -275,9 +274,9 @@
 				var url = 'transfer/';
 				$('#fileupload').fileupload({
 					url: url,
-					autoUpload: false,
 					dataType: 'json',
-					 acceptFileTypes: /(\.|\/)(zip|rar|7z|pdf)$/i,
+					autoUpload: false,
+					acceptFileTypes: /(\.|\/)(zip|rar|7z|pdf)$/i,
 					maxFileSize: 50 * 1024 * 1024,
 					done: function (e, data) {
 						window.location.href="groups/materials.php?success";				
@@ -293,6 +292,9 @@
 					$.each(data.files, function (index, file) {
 						$('#inFile').text(file.name);
 						$('#upload').removeAttr('disabled');
+						$('#upload').click(function (){
+							data.submit();
+						});
 					});
 				}).prop('disabled', !$.support.fileInput)
 				.parent().addClass($.support.fileInput ? undefined : 'disabled');
