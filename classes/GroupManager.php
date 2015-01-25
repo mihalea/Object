@@ -1,9 +1,8 @@
 <?php
-	$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/config/site.php");
-	require_once($path);
+	$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/";
 	
-	require_once("../classes/Permissions.php");
-	require_once("../classes/Helper.php");
+	require_once($path . "config/site.php");
+	require_once($path . "classes/Permissions.php");
 	
 	class GroupManager {
 		
@@ -152,7 +151,7 @@
 		
 		private function createComment() 
 		{
-			if(empty($_POST["comment"])) {
+			if(empty($_POST["text"])) {
 				die("Empty text");
 			} elseif (empty($_SESSION["id"])) {
 				die("Empty user id");
@@ -172,7 +171,7 @@
 				$group_id = $_SESSION["group_id"];
 				$post_id = $_POST["post_id"];
 				$user_id = $_SESSION["id"];
-				$comment = strip_tags($_POST["comment"]);
+				$comment = strip_tags($_POST["text"]);
 				
 				$ok = $stmt->bind_param("iiis", $group_id, $post_id, $user_id, $comment);
 				if(false === $ok) {

@@ -8,40 +8,42 @@
 		$time = $timeNow - $timePost;
 		if($time<0) {
 			$time = -$time;
-		} else {
+			} else {
 			$suffix = " ago";
 		}
-		
-		
-		$time = $time / 60; #minutes
 		$out = "";
-		if( $time < 60 ) {
-			$time = round($time);
-			
-			if($time == 1)
-			$out = $time . ' minute';
-			else
-			$out = $time . ' minutes';
+		if($time < 60) {
+			$out = $time . " seconds";
 			} else {
-			$time = $time / 60; #hours
-			if ( $time < 24 ) {
+			$time = $time / 60; #minutes
+			if( $time < 60 ) {
 				$time = round($time);
+				
 				if($time == 1)
-				$out = $time . ' hour';
+				$out = $time . ' minute';
 				else
-				$out = $time . ' hours';
+				$out = $time . ' minutes';
 				} else {
-				$time = round($time / 24); #days
-				if($time == 1)
-				$out = $time . ' day';
-				else
-				$out = $time . ' days';
+				$time = $time / 60; #hours
+				if ( $time < 24 ) {
+					$time = round($time);
+					if($time == 1)
+					$out = $time . ' hour';
+					else
+					$out = $time . ' hours';
+					} else {
+					$time = round($time / 24); #days
+					if($time == 1)
+					$out = $time . ' day';
+					else
+					$out = $time . ' days';
+				}
 			}
 		}
 		
 		if(!empty($suffix))
-			$out = $out . $suffix;
-			
+		$out = $out . $suffix;
+		
 		return $out;
 	}	
 	
@@ -57,4 +59,4 @@
 		$bytes /= (1 << (10 * $pow)); 
 		
 		return round($bytes, $precision) . ' ' . $units[$pow]; 
-	} 		
+	} 			

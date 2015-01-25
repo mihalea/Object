@@ -2,12 +2,20 @@
 	session_start();
 	require_once("../config/db.php");
 	require_once("../classes/Permissions.php");
+	require_once("../classes/Helper.php");
 	require_once("../classes/EventManager.php");
 	
-	if(isset($_GET["schedule"])) {
+	if(isset($_GET["schedule"])) 
+	{
 		getSchedule();
-		} elseif (isset($_GET["events"])) {
+	} 
+	elseif (isset($_GET["events"])) 
+	{
 		getEvents();
+	}
+	elseif (isset($_GET["comments"]))
+	{
+		getComments();
 	}
 	
 	function getEvents()
@@ -19,14 +27,14 @@
 	{
 		if(isset($_SESSION["id"]) AND !empty($_SESSION["id"]) AND 
 		isset($_SESSION["group_id"]) AND !empty($_SESSION["group_id"])) {
+			if(hasGroupFlag('u') == false)
+			http_response_code(403);
+	
 			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			
 			if($conn->connect_errno)
 			die("Failed to connect to database");
-			
-			if(hasGroupFlag('u') == false)
-			http_response_code(403);
-			
+
 			$query = "SELECT schedule_id
 			FROM groups
 			WHERE group_id = ?
@@ -107,6 +115,67 @@
 			}
 			
 			echo json_encode($events);
+		}
+	}
+	
+	function getComments()
+	{
+		if(empty($_SESSION["id"]))
+			die("Empty user id");
+		elseif (empty($_SESSION["group_id"]))
+			die("Empty group id");
+		elseif (empty($_GET["post_id"]))
+			die("Empty post id");
+		elseif (!isset($_GET["batch"]))
+			die("Empty batch");
+		else {
+			if(hasGroupFlag('u') == false)
+			http_response_code(403);
+	
+	
+			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+			
+			if($conn->connect_errno)
+			die("Failed to connect to database");
+
+			$query = "SELECT c.comment_id, m.name, c.text, c.date
+			FROM comments c
+			INNER JOIN members m ON c.user_id = m.user_id 
+			WHERE c.post_id = ?
+			ORDER BY c.date DESC";
+			
+			$query = $query . " LIMIT " . $_GET["batch"] * 10  . ", 10";
+			$stmt = $conn->prepare($query);
+			if(false === $stmt)
+			die("Prepare failed");
+			
+			$ok = $stmt->bind_param("i", $_GET["post_id"]);
+			if(false === $ok)
+			die("bind_param failed");
+			
+			$ok = $stmt->execute();
+			if(false === $ok)
+			die("Execute failed");
+			
+			$ok = $stmt->bind_result($comment_id, $name, $text, $date);
+			if(false === $ok)
+			die("bind_result failed");
+			
+			
+			$comments = array();
+			while($stmt->fetch()) {
+				$comments[] = array( 'comment_id' => $comment_id,
+									'name' => $name,
+									'text' => $text,
+									'date' => $date,
+									'ago' => timeDifference($date));
+			}
+			
+			
+			
+			$stmt->close();
+			
+			echo json_encode(array_reverse($comments));
 		}
 	}
 ?>

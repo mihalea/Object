@@ -62,7 +62,7 @@
 							echo '<div class="alert alert-danger""><p>Error! Failed to open that group</p></div>';
 							} elseif(isset($_GET["error"]) AND $_GET["error"] == "comment") {
 							echo '<div class="alert alert-danger""><p>Error! Failed to comment</p></div>';
-							}
+						}
 						
 						$groups = GroupManager::getGroups();
 						if(is_array($groups) AND count($groups) > 0) {
@@ -149,7 +149,7 @@
 										<small>
 											<?php
 												$id = $post["post_id"];
-												echo '<span data-toggle="collapse" href="#comment_'. $id .'" aria-expanded="false" aria-controls="comment_' . $id . '">';
+												echo '<span class="toggleComment" value="' . $id . '" count="' . (empty($post["count"]) ? 0 : $post["count"]) . '" target="#comments_'. $id .'" data-toggle="collapse" href="#comment_'. $id .'" aria-expanded="false" aria-controls="comment_' . $id . '">';
 												if(empty($post["count"])) 
 												{
 													echo '<span class="text-info cursor-hand">New comment</span>';
@@ -168,14 +168,19 @@
 										
 										
 										<div class="collapse" id="comment_<?=$id?>">
-											<form method="post" class="form comment-block">
-												<div class="form-group">
-													<textarea rows="3" name="comment" class="form-control autogrow"></textarea>
+										
+											<div class="comment-block">
+												<div id="comments_<?=$id?>">
 												</div>
-												
-												<input type="hidden" name="post_id" value="<?=$id?>" />
-												<input type="submit" name="comment" value="Comment" class="btn btn-success pull-right" />
-											</form>
+												<form method="post" class="form" style="margin-top:15px">
+													<div class="form-group">
+														<textarea rows="3" name="text" class="form-control autogrow"></textarea>
+													</div>
+													
+													<input type="hidden" name="post_id" value="<?=$id?>" />
+													<input type="submit" name="comment" value="Comment" class="btn btn-success pull-right" />
+												</form>
+											</div>
 										</div>
 										
 										<div class="clearfix"></div>
@@ -211,13 +216,20 @@
 						<?php } ?>
 					</div>
 				</div>
+				
+				<div id="template" style="visibility: hidden;">
+					<strong><span class="text-info">Name</span></strong>&nbsp;
+					<span class="text"></span>
+					<br />
+					<span class="text-muted">Hours ago</span>
+				</div>
 			</div>
 			
 			
 			
-		<?php } } else { ?>
-		NOT LOGGED IN!
-	<?php } ?>
+		<?php } } else { 
+			header('Location: /test/index.php?ref=groups');
+	 } ?>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 	<script src="js/jquery.autogrowtextarea.min.js"></script>	
@@ -225,6 +237,61 @@
 	<script>
 		$(document).ready(function() {
 			$('.autogrow').autoGrow();
+			
+			$('.toggleComment').click( function() {
+				var parent = $(this);
+				var post_id = parent.attr("value");
+				var target = $(document).find(parent.attr("target"));
+				var count = parent.attr('count');
+				var hasComments = parent.attr("hasComments");
+				
+				var attr = parent.attr("batch");
+				if(typeof attr == typeof undefined || attr === false)
+					parent.attr("batch", "0");
+				else {
+					if(attr == -1) {
+						return;
+					}
+				
+					var incr = parseInt(attr + 1);
+					parent.attr("batch", incr);
+				}
+					
+				var batch = parent.attr("batch");
+
+				$.ajax({
+					dataType: "json",
+					url: "groups/ajax.php?comments&post_id=" + post_id + "&batch=" + batch,
+					})
+				.done(function( data ) {
+					if(data.length == 0) {
+						parent.attr("batch", "-1");
+						parent.attr("style", "visibility: hidden;");
+						return;
+					}
+				
+					$.each(data, function (index, comment) {
+						var comm = $('#template').clone();
+						comm.attr('style', 'margin-bottom: 5px');
+						comm.find('span.text-info').text(comment.name);
+						comm.find('span.text').text(comment.text);
+						comm.find('span.text-muted').text(comment.ago);
+						
+						if(batch == 0)
+							target.append(comm);
+						else
+							target.prepend(comm);
+					});
+
+					//$(this).attr("hasComments", "true");
+					parent.attr("hasComments", "true");
+					parent.attr("href", "");
+					if(count > 10) {
+						parent.children('span').text("View previous comments");
+					}
+				});
+			});
+			
 		});
 		
 	</script>
