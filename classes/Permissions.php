@@ -31,9 +31,9 @@
 				$stmt->bind_result($dbFlag);
 				$stmt->fetch();
 				
-				if($flag == 'u' AND ($dbFlag == 'a' OR $dbFlag == 'u'))
+				if($flag == 'u' AND ($dbFlag == 'a' OR $dbFlag == 'u' OR $dbFlag == 'o'))
 					return true;
-				elseif($flag == 'a' && $dbFlag == 'a')
+				elseif($flag == 'a' && ($dbFlag == 'a' OR $dbFlag == 'o'))
 					return true;
 				else
 					return false;

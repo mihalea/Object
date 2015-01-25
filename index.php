@@ -4,9 +4,9 @@
 	<head>
 		<meta charset="utf-8">
 		
-		<base href="//localhost/test/">	
+		<?php $path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/"; require_once($path . "config/site.php"); echo '<base href="' . SITE_ROOT . '/">'; ?>	
 		
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 		<title> Object </title>
 	</head>
@@ -26,6 +26,10 @@
 			
 			if ($login->isLogged()) { 
 			include("views/navbar.php");?>
+			
+				<div class="container">
+					
+				</div>
 			
 			<?php } else { ?>
 			
@@ -65,7 +69,7 @@
 		<?php } ?>
 		
 		
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+		<script src="js/jquery-1.11.2.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
 	</body>
 </html>

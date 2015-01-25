@@ -15,6 +15,8 @@
 		getComments();
 	} elseif (isset($_GET["personal"])) {
 		getPersonalEvents();
+	} elseif (isset($_GET["members"])) {
+		getMembers();
 	}
 	
 	
@@ -316,6 +318,42 @@
 			$stmt->close();
 			
 			echo json_encode(array_reverse($comments));
+		}
+	}
+	
+	function getMembers() {
+		if(empty($_SESSION["id"]))
+			die("Empty user id");
+		else {
+			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+			
+			if($conn->connect_errno)
+			die("Failed to connect to database");
+
+			$query = "SELECT user_id, name FROM members ORDER BY name ASC";
+			
+			$stmt = $conn->prepare($query);
+			if(false === $stmt)
+			die("Prepare failed");
+			
+			$ok = $stmt->execute();
+			if(false === $ok)
+			die("Execute failed");
+			
+			$ok = $stmt->bind_result($user_id, $name);
+			if(false === $ok)
+			die("bind_result failed");
+			
+			
+			$comments = array();
+			while($stmt->fetch()) {
+				$comments[] = array( 'user_id' => $user_id,
+									'name' => $name );
+			}
+			
+			$stmt->close();
+			
+			echo json_encode($comments);
 		}
 	}
 ?>

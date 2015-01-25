@@ -3,18 +3,22 @@
 	<head>
 		<meta charset="utf-8">
 		
-		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-		<link rel="stylesheet" href="../css/styles.css">
+		<?php
+			$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/";
+			require_once($path . "config/site.php");
+			echo '<base href="' . SITE_ROOT . '/">';
+		?>
 		
-		<base href="//localhost/test/">
+		<link href="css/font-awesome.min.css" rel="stylesheet">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="css/styles.css">
 		
 		<title> Groups </title>
 	</head>
 	<body>
 		<?php
 			
-			require_once("../config/site.php");
+			$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/"; require_once($path . "config/site.php");
 			require_once("../config/db.php");
 			require_once("../classes/Login.php");
 			require_once("../classes/GroupManager.php");
@@ -41,8 +45,8 @@
 							
 							<form class="form-horizontal" id="createGroup" method="POST">
 								<div class="form-group">
-									<label for="inputName" class="col-sm-2 control-label">Name: </label>
-									<div class="col-sm-10">
+									<label for="inputName" class="col-md-2 control-label">Name: </label>
+									<div class="col-md-10">
 										<input type="text" id="inputName" name="name" pattern=".{3,32}" class="form-control" required/>
 									</div>
 								</div>
@@ -88,12 +92,17 @@
 					<div class="page-header red-pageheader">
 						<h2>
 							<span><?= $_SESSION["group_name"] ?></span>
-							<button type="button" class="btn btn-primary pull-right" data-toggle="collapse" data-target="#newMessageCollapse" aria-expanded="false" aria-controls="newMessageCollapse"><span class="glyphicon glyphicon-pencil">&nbsp;</span>New post</button>
+							<div class="pull-right">
+								<?php if(hasGroupFlag('a')) { ?>
+									<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#user_modal"><i class="fa fa-user-plus"></i>&nbsp;Add member</button>
+								<?php } ?>
+								<button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#newMessageCollapse" aria-expanded="false" aria-controls="newMessageCollapse"><i class="fa fa-pencil"></i>&nbsp;New post</button>
+							</div>
 						</h2>
 					</div>
 					
 					<div class="row">
-						<div class="col-sm-9">
+						<div class="col-md-9">
 							<div class="collapse" id="newMessageCollapse">						
 								<form id="addEvent" method="POST">
 									<div class="form-group">
@@ -168,7 +177,7 @@
 										
 										
 										<div class="collapse" id="comment_<?=$id?>">
-										
+											
 											<div class="comment-block">
 												<div id="comments_<?=$id?>">
 												</div>
@@ -190,30 +199,8 @@
 							}
 						?>
 					</div>
-					<div class="col-sm-3">
-						
-						<div class="list-group">
-							<span class="list-group-item red-heading">Dashboard</span>
-							<a href="groups/schedule.php" class="list-group-item">Schedule</a>
-							<a href="groups/events.php" class="list-group-item">Events</a>
-							<a href="groups/materials.php" class="list-group-item">Materials</a>
-							<a href="#" class="list-group-item">Members</a>
-						</div>
-						
-						<?php 
-							$events = EventManager::getEvents(7, 10);
-							if(is_array($events) AND count($events) > 0) { ?>
-							<div class="list group">
-								<span class="list-group-item red-heading">Upcoming events</span>										
-								<?php
-									foreach($events as $e) {
-										echo '<a href="groups/events.php?event_id=' . $e["id"] . '" class="list-group-item"> '
-										. substr($e["title"], 0, 15) , (strlen($e["title"]) > 15 ? "..." : "") . 
-										'<span class="badge visible-lg-inline-block">' . timeDifference($e["date"]) . '</span></a>';
-									}
-								?>
-							</div>
-						<?php } ?>
+					<div class="col-md-3">
+						<?php include("../views/side_panel.php"); ?>
 					</div>
 				</div>
 				
@@ -223,80 +210,183 @@
 					<br />
 					<span class="text-muted">Hours ago</span>
 				</div>
+				
+			</div>
+			
+			<div class="modal fade" id="user_modal" tabindex="-1" role="dialog" aria-labelledby="modal_label" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title" id="modal_label">Add new user</h4>
+						</div>
+						<div class="modal-body">
+							<form method="post" class="form" id="user_form">
+								<div class="form-group">
+									<label class="control-label">Name</label>
+									<input class="form-control" type="text" id="user" name="name" />
+									<input type="hidden" name="newUser" />
+								</div>
+							</form>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default fixed-width" data-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-primary fixed-width" id="btnAddUser">Add</button>
+						</div>
+					</div>
+				</div>
 			</div>
 			
 			
 			
-		<?php } } else { 
+			<?php } } else { 
 			header('Location: /test/index.php?ref=groups');
-	 } ?>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-	<script src="js/jquery.autogrowtextarea.min.js"></script>	
-	
-	<script>
-		$(document).ready(function() {
-			$('.autogrow').autoGrow();
-			
-			$('.toggleComment').click( function() {
-				var parent = $(this);
-				var post_id = parent.attr("value");
-				var target = $(document).find(parent.attr("target"));
-				var count = parent.attr('count');
-				var hasComments = parent.attr("hasComments");
-				
-				var attr = parent.attr("batch");
-				if(typeof attr == typeof undefined || attr === false)
-					parent.attr("batch", "0");
-				else {
-					if(attr == -1) {
-						return;
-					}
-				
-					var incr = parseInt(attr + 1);
-					parent.attr("batch", incr);
-				}
+		} ?>
+		<script src="js/jquery-1.11.2.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/moment.js"></script>
+		<script src="js/jquery.autogrowtextarea.min.js"></script>	
+		<script src="js/bootstrap-datetimepicker.js"></script>		
+		
+		<script src="js/typeahead.bundle.min.js"></script>
+		
+		<script>
+			var substringMatcher = function(strs) {
+				return function findMatches(q, cb) {
+					var matches, substrRegex;
 					
-				var batch = parent.attr("batch");
-
-				$.ajax({
-					dataType: "json",
-					url: "groups/ajax.php?comments&post_id=" + post_id + "&batch=" + batch,
-					})
-				.done(function( data ) {
-					if(data.length == 0) {
-						parent.attr("batch", "-1");
-						parent.attr("style", "visibility: hidden;");
-						return;
-					}
-				
-					$.each(data, function (index, comment) {
-						var comm = $('#template').clone();
-						comm.attr('style', 'margin-bottom: 5px');
-						comm.find('span.text-info').text(comment.name);
-						comm.find('span.text').text(comment.text);
-						comm.find('span.text-muted').text(comment.ago);
-						
-						if(batch == 0)
-							target.append(comm);
-						else
-							target.prepend(comm);
+					// an array that will be populated with substring matches
+					matches = [];
+					
+					// regex used to determine if a string contains the substring `q`
+					substrRegex = new RegExp(q, 'i');
+					
+					// iterate through the pool of strings and for any string that
+					// contains the substring `q`, add it to the `matches` array
+					$.each(strs, function(i, str) {
+						if (substrRegex.test(str)) {
+							// the typeahead jQuery plugin expects suggestions to a
+							// JavaScript object, refer to typeahead docs for more info
+							matches.push({ value: str });
+						}
 					});
-
-					//$(this).attr("hasComments", "true");
-					parent.attr("hasComments", "true");
-					parent.attr("href", "");
-					if(count > 10) {
-						parent.children('span').text("View previous comments");
-					} else if (count < 10) {
-						parent.attr("batch", "-1");
-						parent.attr("style", "visibility: hidden;");
-					}
+					
+					cb(matches);
+				};
+			}; 
+			
+			var substringMatcher = function(strs) {
+				return function findMatches(q, cb) {
+					var matches, substrRegex;
+					
+					// an array that will be populated with substring matches
+					matches = [];
+					
+					// regex used to determine if a string contains the substring `q`
+					substrRegex = new RegExp(q, 'i');
+					
+					// iterate through the pool of strings and for any string that
+					// contains the substring `q`, add it to the `matches` array
+					$.each(strs, function(i, str) {
+						if (substrRegex.test(str)) {
+							// the typeahead jQuery plugin expects suggestions to a
+							// JavaScript object, refer to typeahead docs for more info
+							matches.push({ value: str });
+						}
+					});
+					
+					cb(matches);
+				};
+			};
+			var members = [<?php
+				$members = getAllUsers();
+				
+				echo "'" . $members[0]["name"] . "'";
+				$len = count($members);
+				for($i = 1 ; $i < $len ; $i++)
+				echo ", '" . $members[$i]["name"] . "'";
+			?>
+			];
+			
+			$('#user').typeahead({
+				hint: true,
+				highlight: true,
+				minLength: 1
+			},
+			{
+				name: 'members',
+				displayKey: 'value',
+				source: substringMatcher(members)
+			}); 
+		</script>
+		
+		<script>
+			$(document).ready(function() {
+				$('.autogrow').autoGrow();
+				
+				$('#btnAddUser').click(function() {
+					$('#user_form').submit();
 				});
+				
+				$('.toggleComment').click( function() {
+					var parent = $(this);
+					var post_id = parent.attr("value");
+					var target = $(document).find(parent.attr("target"));
+					var count = parent.attr('count');
+					var hasComments = parent.attr("hasComments");
+					
+					var attr = parent.attr("batch");
+					if(typeof attr == typeof undefined || attr === false)
+					parent.attr("batch", "0");
+					else {
+						if(attr == -1) {
+							return;
+						}
+						
+						var incr = parseInt(attr + 1);
+						parent.attr("batch", incr);
+					}
+					
+					var batch = parent.attr("batch");
+					
+					$.ajax({
+						dataType: "json",
+						url: "<?=SITE_ROOT?>classes/ajax.php?comments&post_id=" + post_id + "&batch=" + batch
+					})
+					.done(function( data ) {
+						if(data.length == 0) {
+							parent.attr("batch", "-1");
+							parent.attr("style", "visibility: hidden;");
+							return;
+						}
+						
+						$.each(data, function (index, comment) {
+							var comm = $('#template').clone();
+							comm.attr('style', 'margin-bottom: 5px');
+							comm.find('span.text-info').text(comment.name);
+							comm.find('span.text').text(comment.text);
+							comm.find('span.text-muted').text(comment.ago);
+							
+							if(batch == 0)
+							target.append(comm);
+							else
+							target.prepend(comm);
+						});
+						
+						//$(this).attr("hasComments", "true");
+						parent.attr("hasComments", "true");
+						parent.attr("href", "");
+						if(count > 10) {
+							parent.children('span').text("View previous comments");
+							} else if (count < 10) {
+							parent.attr("batch", "-1");
+							parent.attr("style", "visibility: hidden;");
+						}
+					});
+				});
+				
 			});
 			
-		});
-		
-	</script>
+		</script>
 </body>
 </html>

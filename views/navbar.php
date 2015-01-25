@@ -1,6 +1,8 @@
 <?php
-$page = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
-$root = "//localhost/test/";
+	$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/";
+	require_once($path . "config/site.php");
+	echo '<base href="' . SITE_ROOT . '/">';
+	$page = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
 ?>
 
 <nav class="navbar navbar-default navbar-fixed-top">
@@ -13,24 +15,24 @@ $root = "//localhost/test/";
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href=<?=$root?>>
+			<a class="navbar-brand" href=<?=SITE_ROOT?>>
 				<span class="glyphicon glyphicon-home" aria-hidden="true"/>
 			</a>
 		</div>
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse" id="navbar">
 			<ul class="nav navbar-nav">
-				<li <?php if ($page == $root . "index.php") echo ' class="active"'?>>
-					<a href=<?=$root?>>Frontpage</a>
+				<li <?php if ($page == SITE_ROOT . "index.php") echo ' class="active"'?>>
+					<a href=<?=SITE_ROOT?>>Frontpage</a>
 				</li>
 				<li <?php if (preg_match('/test\/groups/', $page)) echo ' class="active"'?>>
-					<a href=<?=$root, "groups?select"?>>Groups</a>
+					<a href=<?=SITE_ROOT, "groups?select"?>>Groups</a>
 				</li>
 				<li <?php if (preg_match('/test\/events/', $page)) echo ' class="active"'?>>
-					<a href=<?=$root, "events"?>>Events</a>
+					<a href=<?=SITE_ROOT, "events"?>>Events</a>
 				</li>
 				<li <?php if (preg_match('/test\/grades/', $page)) echo ' class="active"'?>>
-					<a href=<?=$root, "grades"?>>Grades</a>
+					<a href=<?=SITE_ROOT, "grades"?>>Grades</a>
 				</li>
 			</ul>
 			

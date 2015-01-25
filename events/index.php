@@ -3,10 +3,14 @@
 	<head>
 		<meta charset="utf-8">
 		
-		<base href="//localhost/test/">
+		<?php
+			$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/";
+			require_once($path . "config/site.php");
+			echo '<base href="' . SITE_ROOT . '/">';
+		?>
 		
-		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+		<link href="css/font-awesome.min.css" rel="stylesheet">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="css/fullcalendar.min.css">
 		<link rel="stylesheet" href="css/fullcalendar.print.css" media="print">
 		<link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
@@ -34,10 +38,10 @@
 			</div>
 			
 			<div class="row">
-				<div class="col-sm-8">
+				<div class="col-md-8">
 					<div id='calendar'></div>
 				</div>
-				<div class="col-sm-4">
+				<div class="col-md-4">
 					<div class="panel-group" role="tablist" id="accordion" aria-multiselectable="true" style="position: relative; top: 50px;">
 						<div class="panel panel-default">
 							<div class="panel-heading red-heading" id="addHeading">
@@ -51,22 +55,22 @@
 								<div class="panel-body">
 									<form method="post" class="form-horizontal" id="form">
 										<div class="form-group">
-											<label for="name" class="col-sm-3 control-label">Name: </label>
-											<div class="col-sm-9">
+											<label for="name" class="col-md-3 control-label">Name: </label>
+											<div class="col-md-9">
 												<input type="text" id="name" name="name" pattern=".{3,128}" class="form-control" required/>
 											</div>
 										</div>
 										
 										<div class="form-group">
-											<label for="location" class="col-sm-3 control-label">Location: </label>
-											<div class="col-sm-9">
+											<label for="location" class="col-md-3 control-label">Location: </label>
+											<div class="col-md-9">
 												<input type="text" id="location" name="location" pattern=".{3,64}" class="form-control"/>
 											</div>
 										</div>
 										
 										<div class="form-group">
-											<label for="date" class="col-sm-3 control-label">Date: </label>
-											<div class="col-sm-9">
+											<label for="date" class="col-md-3 control-label">Date: </label>
+											<div class="col-md-9">
 												<div class="input-group date" id="pickDate">
 													<input type="text" id="date" name="date" class="form-control" data-date-format="YYYY-MM-DD" required/>
 													<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
@@ -75,8 +79,8 @@
 										</div>
 										
 										<div class="form-group">
-											<label for="start" class="col-sm-3 control-label">Start: </label>
-											<div class="col-sm-9">
+											<label for="start" class="col-md-3 control-label">Start: </label>
+											<div class="col-md-9">
 												<div class="input-group date" id="pickStart">
 													<input type="text" id="start" name="start" class="form-control" data-date-format="HH:mm"/>
 													<span class="input-group-addon"><span class="glyphicon glyphicon-time"></span></span>
@@ -85,8 +89,8 @@
 										</div>
 										
 										<div class="form-group">
-											<label for="end" class="col-sm-3 control-label">End: </label>
-											<div class="col-sm-9">
+											<label for="end" class="col-md-3 control-label">End: </label>
+											<div class="col-md-9">
 												<div class="input-group date" id="pickEnd">
 													<input type="text" id="end" name="end" class="form-control" data-date-format="HH:mm"/>
 													<span class="input-group-addon"><span class="glyphicon glyphicon-time"></span></span>
@@ -95,8 +99,8 @@
 										</div>
 										
 										<div class="form-group">
-											<label for="comment" class="col-sm-3 control-label">Comment: </label>
-											<div class="col-sm-9">
+											<label for="comment" class="col-md-3 control-label">Comment: </label>
+											<div class="col-md-9">
 												<textarea rows="2" id="comment" name="comment" class="form-control"></textarea>
 											</div>
 										</div>
@@ -118,22 +122,22 @@
 								<div class="panel-body">
 									<form method="post" class="form-horizontal" id="form">
 										<div class="form-group">
-											<label for="d_name" class="col-sm-3 control-label">Name: </label>
-											<div class="col-sm-9">
+											<label for="d_name" class="col-md-3 control-label">Name: </label>
+											<div class="col-md-9">
 												<input type="text" id="d_name" name="name" pattern=".{3,128}" class="form-control readonly" disabled="disabled"/>
 											</div>
 										</div>
 										
 										<div class="form-group">
-											<label for="d_location" class="col-sm-3 control-label">Location: </label>
-											<div class="col-sm-9">
+											<label for="d_location" class="col-md-3 control-label">Location: </label>
+											<div class="col-md-9">
 												<input type="text" id="d_location" name="location" pattern=".{3,64}" class="form-control readonly" disabled="disabled"/>
 											</div>
 										</div>
 										
 										<div class="form-group">
-											<label for="d_date" class="col-sm-3 control-label">Date: </label>
-											<div class="col-sm-9">
+											<label for="d_date" class="col-md-3 control-label">Date: </label>
+											<div class="col-md-9">
 												<div class="input-group date" id="pickDate">
 													<input type="text" id="d_date" name="date" class="form-control readonly" data-date-format="YYYY-MM-DD" disabled="disabled"/>
 													<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
@@ -142,8 +146,8 @@
 										</div>
 										
 										<div class="form-group">
-											<label for="d_start" class="col-sm-3 control-label">Start: </label>
-											<div class="col-sm-9">
+											<label for="d_start" class="col-md-3 control-label">Start: </label>
+											<div class="col-md-9">
 												<div class="input-group date" id="pickStart">
 													<input type="text" id="d_start" name="start" class="form-control readonly" data-date-format="HH:mm" disabled="disabled"/>
 													<span class="input-group-addon"><span class="glyphicon glyphicon-time"></span></span>
@@ -152,8 +156,8 @@
 										</div>
 										
 										<div class="form-group">
-											<label for="d_end" class="col-sm-3 control-label">End: </label>
-											<div class="col-sm-9">
+											<label for="d_end" class="col-md-3 control-label">End: </label>
+											<div class="col-md-9">
 												<div class="input-group date" id="pickEnd">
 													<input type="text" id="d_end" name="end" class="form-control readonly" data-date-format="HH:mm" disabled="disabled"/>
 													<span class="input-group-addon"><span class="glyphicon glyphicon-time"></span></span>
@@ -162,8 +166,8 @@
 										</div>
 										
 										<div class="form-group">
-											<label for="d_comment" class="col-sm-3 control-label">Comment: </label>
-											<div class="col-sm-9">
+											<label for="d_comment" class="col-md-3 control-label">Comment: </label>
+											<div class="col-md-9">
 												<textarea rows="2" id="d_comment" name="comment" class="form-control readonly" disabled="disabled"></textarea>
 											</div>
 										</div>
@@ -187,8 +191,8 @@
 		<?php } else {
 			header('Location: index.php?ref=groups');
 		} ?>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+		<script src="js/jquery-1.11.2.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
 		<script src="js/moment.js"></script>
 		<script src="js/fullcalendar.min.js"></script>
 		<script src="js/bootstrap-datetimepicker.js"></script>	
@@ -216,7 +220,7 @@
 						right: 'prev,next'
 					},
 					//editable: true,
-					events: "<?=SITE_ROOT, "groups/ajax.php?personal"?>",
+					events: "<?=SITE_ROOT, "classes/ajax.php?personal"?>",
 					eventLimit: true, 
 					//defaultView: 'agendaWeek',
 					eventColor: '#a6373f',

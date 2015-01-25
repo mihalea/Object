@@ -2,10 +2,14 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
+		<?php
+			$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/";
+			require_once($path . "config/site.php");
+			echo '<base href="' . SITE_ROOT . '/">';
+		?>
 		
-		<base href="//localhost/test/">
 		
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="css/styles.css">
 		
 		<title> Template </title>
@@ -21,9 +25,9 @@
 			include("../views/navbar.php"); ?>
 		LOGGED IN!
 		<?php } else {
-			header('Location: index.php?ref=groups');
+			header('Location: /test/index.php?ref=groups');
 		} ?>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+		<script src="js/jquery-1.11.2.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
 	</body>
 </html>

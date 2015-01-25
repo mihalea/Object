@@ -3,11 +3,15 @@
 	<head>
 		<meta charset="utf-8">
 		
-		<base href="//localhost/test/">
-			
+		<?php
+			$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/";
+			require_once($path . "config/site.php");
+			echo '<base href="' . SITE_ROOT . '/">';
+		?>
+		
 			<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/font-awesome.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="css/fullcalendar.min.css">
 		<link rel="stylesheet" href="css/fullcalendar.print.css" media="print">
 		<link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
@@ -18,7 +22,7 @@
 	<body>
 		<?php
 			require_once("../config/db.php");
-			require_once("../config/site.php");
+			$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/"; require_once($path . "config/site.php");
 			require_once("../classes/Login.php");
 			require_once("../classes/Permissions.php");
 			require_once("../classes/GroupManager.php");
@@ -59,8 +63,8 @@
 							<div class="panel-body">
 								<form class="form-horizontal" method="POST" id="schedForm">
 									<div class="form-group">
-										<label for="ctrlSubject" class="col-sm-2 control-label">Subject:</label>
-										<div class="col-sm-10">
+										<label for="ctrlSubject" class="col-md-2 control-label">Subject:</label>
+										<div class="col-md-10">
 											<select class="form-control" id="ctrlSubject" name="subject_id"  style="background-color:#fff;" required>
 												<?php
 													foreach(GroupManager::getSubjects() as $sub)
@@ -71,8 +75,8 @@
 									</div>
 									
 									<div class="form-group">
-										<label for="ctrlDay" class="col-sm-2 control-label read-only">Day: </label>
-										<div class="col-sm-10">
+										<label for="ctrlDay" class="col-md-2 control-label read-only">Day: </label>
+										<div class="col-md-10">
 											<select class="form-control" id="ctrlDay" name="day" style="background-color:#fff;"  required>
 												<option value="1">Monday</option>
 												<option value="2">Tuesday</option>
@@ -84,8 +88,8 @@
 									</div>
 									
 									<div class="form-group">
-										<label for="ctrlStart" class="col-sm-2 control-label">Start time: </label>
-										<div class="col-sm-10">
+										<label for="ctrlStart" class="col-md-2 control-label">Start time: </label>
+										<div class="col-md-10">
 											<div class="input-group date" id="pickStart">
 												<input type="text" id="ctrlStart" name="time_start" class="form-control read-only" style="background-color:#fff;"  data-date-format="HH:mm" required/>
 												<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
@@ -94,8 +98,8 @@
 									</div>
 									
 									<div class="form-group">
-										<label for="ctrlEnd" class="col-sm-2 control-label">Start time: </label>
-										<div class="col-sm-10">
+										<label for="ctrlEnd" class="col-md-2 control-label">Start time: </label>
+										<div class="col-md-10">
 											<div class="input-group date" id="pickEnd">
 												<input type="text" id="ctrlEnd" name="time_end" class="form-control read-only" style="background-color:#fff;"  data-date-format="HH:mm"required/>
 												<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
@@ -117,9 +121,9 @@
 			</div>
 			
 			
-			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+			<script src="js/jquery-1.11.2.min.js"></script>
 			<!-- Latest compiled and minified JavaScript -->
-			<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+			<script src="js/bootstrap.min.js"></script>
 			<script src="js/moment.js"></script>
 			<script src="js/fullcalendar.min.js"></script>
 			<script src="js/bootstrap-datetimepicker.js"></script>			
@@ -140,7 +144,7 @@
 					
 					$('#schedule').fullCalendar({
 						//editable: true,
-						events: "<?=SITE_ROOT, "groups/ajax.php?schedule"?>",
+						events: "<?=SITE_ROOT, "classes/ajax.php?schedule"?>",
 						eventLimit: true, 
 						defaultView: 'agendaWeek',
 						eventColor: '#a6373f',

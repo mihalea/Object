@@ -3,10 +3,14 @@
 	<head>
 		<meta charset="utf-8">
 		
-		<base href="//localhost/test/">	
+		<?php
+			$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/";
+			require_once($path . "config/site.php");
+			echo '<base href="' . SITE_ROOT . '/">';
+		?>
 		
-		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+		<link href="css/font-awesome.min.css" rel="stylesheet">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
 		<link rel="stylesheet" href="css/jquery.fileupload.css">
 		<link rel="stylesheet" href="css/styles.css">
@@ -16,7 +20,7 @@
 	<body>
 		<?php
 			require_once("../config/db.php");
-			require_once("../config/site.php");
+			$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/"; require_once($path . "config/site.php");
 			require_once("../classes/Login.php");
 			require_once("../classes/Permissions.php");
 			require_once("../classes/GroupManager.php");
@@ -37,7 +41,7 @@
 				</div>
 			
 			<div class="row">
-				<div class="col-sm-8">
+				<div class="col-md-8">
 					<?php 
 						if (isset($_GET["success"])) {
 							echo '<div class="alert alert-success"><p>Success! The material has been added to this group.</p></div>';
@@ -66,11 +70,11 @@
 							<div class="panel panel-default">
 								<div class="panel-heading red-heading">
 									<div class="row">
-										<div class="col-sm-9">
+										<div class="col-md-9">
 											<h4 class="break-h"><?=$mat["title"]?></h4>
 											<h5 class="break-h"><?=$mat["subject"]?></h5>
 										</div>
-										<div class="col-sm-3">
+										<div class="col-md-3">
 											<a href="transfer/?file_id=<?=$mat["file_id"]?>" class="btn btn-default center-block fixed-width"><i class="fa fa-link"></i>&nbsp;Download</a>
 											<?php
 												if($mat['uploader_id'] == $_SESSION['id'])
@@ -108,7 +112,7 @@
 						}
 					?>
 					</div>
-				<div class="col-sm-4">
+				<div class="col-md-4">
 					<div class="panel-group" role="tablist" id="accordion" aria-multiselectable="true">
 						<div class="panel panel-default">
 							<div class="panel-heading red-heading" id="sortHeading">
@@ -122,14 +126,14 @@
 								<div class="panel-body">
 									<form class="form-horizontal">
 										<div class="form-group">
-											<label for='sortTitle' class="col-sm-3 control-label">Title:</label>
-											<div class="col-sm-9">
+											<label for='sortTitle' class="col-md-3 control-label">Title:</label>
+											<div class="col-md-9">
 												<input type="text" id="sortTitle" class="form-control" name="title"></input>
 											</div>
 										</div>
 										<div class="form-group">
-											<label for='sortSubject' class="col-sm-3 control-label">Subject:</label>
-											<div class="col-sm-9">
+											<label for='sortSubject' class="col-md-3 control-label">Subject:</label>
+											<div class="col-md-9">
 												<select class="form-control" id="sortSubject" name="subject"  required>
 													<?php
 														echo '<option value="0">None</option>';
@@ -140,8 +144,8 @@
 											</div>
 										</div>
 										<div class="form-group">
-											<label for="sortStart" class="col-sm-3 control-label">Start:</label>
-											<div class="col-sm-9">
+											<label for="sortStart" class="col-md-3 control-label">Start:</label>
+											<div class="col-md-9">
 												<div class="input-group date" id="timeStart">
 													<input type="text" id="sortStart" name="time_start" class="form-control"  data-date-format="YYYY-MM-DD"/>
 													<span class="input-group-addon"><span class="glyphicon glyphicon-time"></span></span>
@@ -149,8 +153,8 @@
 											</div>
 										</div>
 										<div class="form-group">
-											<label for="sortEnd" class="col-sm-3 control-label">End: </label>
-											<div class="col-sm-9">
+											<label for="sortEnd" class="col-md-3 control-label">End: </label>
+											<div class="col-md-9">
 												<div class="input-group date" id="timeEnd">
 													<input type="text" id="sortEnd" name="time_end" class="form-control"  data-date-format="YYYY-MM-DD"/>
 													<span class="input-group-addon"><span class="glyphicon glyphicon-time"></span></span>
@@ -176,15 +180,15 @@
 								<div class="panel-body">
 									<form class="form-horizontal" method="POST" enctype="multipart/form-data">
 										<div class="form-group">
-											<label for='inTitle' class="col-sm-3 control-label">Title:</label>
-											<div class="col-sm-9">
+											<label for='inTitle' class="col-md-3 control-label">Title:</label>
+											<div class="col-md-9">
 												<input type="text" id="inTitle" class="form-control" name="title" required></input>
 											</div>
 										</div>
 										
 										<div class="form-group">
-											<label for='inSubjects' class="col-sm-3 control-label">Subject:</label>
-											<div class="col-sm-9">
+											<label for='inSubjects' class="col-md-3 control-label">Subject:</label>
+											<div class="col-md-9">
 												<select class="form-control" id="inSubjects" name="subject"  required>
 													<?php
 														foreach(GroupManager::getSubjects() as $sub)
@@ -195,22 +199,22 @@
 										</div>
 										
 										<div class="form-group">
-											<label for='inAuthor' class="col-sm-3 control-label">Author:</label>
-											<div class="col-sm-9">
+											<label for='inAuthor' class="col-md-3 control-label">Author:</label>
+											<div class="col-md-9">
 												<input type="text" id="inAuthor" class="form-control" name="author" required></input>
 											</div>
 										</div>
 										
 										<div class="form-group">
-											<label for="inComment" class="col-sm-3 control-label">Comment: </label>
-											<div class="col-sm-9">
+											<label for="inComment" class="col-md-3 control-label">Comment: </label>
+											<div class="col-md-9">
 												<textarea rows="3" id="inComment" name="comment" class="form-control"></textarea>
 											</div>
 										</div>
 										
 										<div class="form-group">
-											<label for="inFile" class="col-sm-3 control-label">File: </label>
-											<div class="col-sm-9">
+											<label for="inFile" class="col-md-3 control-label">File: </label>
+											<div class="col-md-9">
 												<span id="inFile" class="form-control">None</span>
 											</div>
 										</div>
@@ -248,8 +252,8 @@
 		<?php } else {
 			header('Location: index.php?ref=groups');
 		} ?>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+		<script src="js/jquery-1.11.2.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
 		
 		<script src="js/moment.js"></script>
 		<script src="js/bootstrap-datetimepicker.js"></script>		
@@ -344,9 +348,8 @@
 					cb(matches);
 				};
 			};
-			
 			var members = [<?php
-				$members = GroupManager::getMembers();
+				$members = getAllUsers();
 				
 				echo "'" . $members[0]["name"] . "'";
 				$len = count($members);

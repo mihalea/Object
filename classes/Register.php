@@ -1,7 +1,7 @@
 <?php
 
 require_once("../config/db.php");
-require_once("../config/site.php");
+$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/"; require_once($path . "config/site.php");
 
 class Register {
 

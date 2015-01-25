@@ -11,8 +11,7 @@
 		
 		public function __construct()
 		{
-			$url = "Location: " . SITE_ROOT . "groups?";
-	
+			$url = "Location: " . SITE_ROOT . "groups";
 				
 			$this->conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			if($this->conn->connect_error) {
@@ -24,25 +23,49 @@
 				if ($this->createGroup() == true) {
 					header($url);
 					} else {
-					header($url . "error=create");
+					header($url . "?error=create");
 				}
 			} elseif (isset($_POST["newPost"])) {
 				if($this->createPost() == true) {
 					header($url);
 					} else {
-					header($url . "error=post");
+					header($url . "?error=post");
 				}
 			} elseif(isset($_POST["comment"])) {
 				if($this->createComment() == true) {
 					header($url);
 					} else {
-					header($url . "error=comment");
+					header($url . "?error=comment");
 				}
-			}elseif (isset($_GET["setid"])) {
+			} elseif (isset($_GET["setid"])) {
 				if($this->setID() == true) {
 					header($url);
 					} else {
-					header($url . "select&error=set");
+					header($url . "?select&error=set");
+				}
+			} elseif (isset($_POST["newUser"])) {
+				if($this->addUser() == true) {
+					header($url . '/members.php');
+					} else {
+					header($url . "/members.php/?error=user");
+				}
+			} elseif (isset($_POST["remUser"])) {
+				if($this->remUser() == true) {
+					header($url);
+					} else {
+					header($url . "?error=delUser");
+				}
+			} elseif (isset($_POST["makeAdmin"])) {
+				if($this->makeAdmin() == true) {
+					header($url);
+					} else {
+					header($url . "?error=delUser");
+				}
+			} elseif (isset($_POST["makeUser"])) {
+				if($this->makeUser() == true) {
+					header($url);
+					} else {
+					header($url . "?error=delUser");
 				}
 			}
 		}
@@ -84,7 +107,7 @@
 					return false;
 				}
 				
-				$flag = "a";
+				$flag = "o";
 				$ok = $stmt->bind_param("is", $user_id, $flag);
 				if(false === $ok) {
 					$this->errors[] = "Failed to prepare statement";
@@ -192,6 +215,222 @@
 			return false;
 		}
 		
+		private function addUser() {
+			if(empty($_POST["name"])) {
+				die("Empty name");
+			} elseif(empty($_SESSION["group_id"])) {
+				die("Empty name");
+			} else {
+				if(hasGroupFlag('a') == false)
+					return false;
+				
+				$query = "SELECT user_id
+				FROM members
+				WHERE name = ?
+				LIMIT 1;";
+				$stmt = $this->conn->prepare($query);
+				if(false === $stmt)
+				die("Prepare failed");
+				
+				$ok = $stmt->bind_param("s", $_POST["name"]);
+				if(false === $ok)
+				die("bind_param failed");
+				
+				$ok = $stmt->execute();
+				if(false === $ok)
+				die("Execute failed");
+				
+				$ok = $stmt->bind_result($user_id);
+				if(false === $ok)
+				die("bind_result failed");
+				
+				$ok = $stmt->fetch();
+				if(false === $ok)
+				die("Execute failed");
+				
+				$stmt->close();
+				
+				if(!empty($user_id)) {
+				
+					$query = "INSERT INTO membership (user_id, group_id, flag) VALUES (?, ?, 'u')";
+					$stmt = $this->conn->prepare($query);
+					if(false === $stmt)
+					die("Prepare failed");
+					
+					$ok = $stmt->bind_param("ii", $user_id, $_SESSION["group_id"]);
+					if(false === $ok)
+					die("bind_param failed");
+					
+					$ok = $stmt->execute();
+					if(false === $ok)
+					die("Execute failed");
+					
+					$stmt->close();
+				}
+				
+				return true;
+			}
+		}
+		
+		private function remUser() {
+			if(empty($_POST["user_id"])) {
+				die("Empty name");
+			} elseif(empty($_SESSION["group_id"])) {
+				die("Empty name");
+			} else {
+				if(hasGroupFlag('a') == false)
+					return false;
+					
+				$query = "SELECT flag FROM membership WHERE user_id = ? AND group_id = ?";
+				$stmt = $this->conn->prepare($query);
+				if(false === $stmt)
+				die("Prepare failed");
+				
+				$ok = $stmt->bind_param("ii", $_POST["user_id"], $_SESSION["group_id"]);
+				if(false === $ok)
+				die("bind_param failed");
+				
+				$ok = $stmt->execute();
+				if(false === $ok)
+				die("Execute failed");
+				
+				$ok = $stmt->bind_result($flag);
+				if(false === $ok)
+				die("bind_result failed");
+				
+				$stmt->fetch();
+				
+				$stmt->close();	
+				
+				if($flag != 'a') {
+					
+					$query = "DELETE FROM membership WHERE user_id = ? AND group_id = ?";
+					$stmt = $this->conn->prepare($query);
+					if(false === $stmt)
+					die("Prepare failed");
+					
+					$ok = $stmt->bind_param("ii", $_POST["user_id"], $_SESSION["group_id"]);
+					if(false === $ok)
+					die("bind_param failed");
+					
+					$ok = $stmt->execute();
+					if(false === $ok)
+					die("Execute failed");
+					
+					$stmt->close();
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		
+		private function makeAdmin() {
+			if(empty($_POST["user_id"])) {
+				die("Empty name");
+			} elseif(empty($_SESSION["group_id"])) {
+				die("Empty name");
+			} else {
+				if(hasGroupFlag('a') == false)
+					return false;
+					
+				$query = "SELECT flag FROM membership WHERE user_id = ? AND group_id = ?";
+				$stmt = $this->conn->prepare($query);
+				if(false === $stmt)
+				die("Prepare failed");
+				
+				$ok = $stmt->bind_param("ii", $_POST["user_id"], $_SESSION["group_id"]);
+				if(false === $ok)
+				die("bind_param failed");
+				
+				$ok = $stmt->execute();
+				if(false === $ok)
+				die("Execute failed");
+				
+				$ok = $stmt->bind_result($flag);
+				if(false === $ok)
+				die("bind_result failed");
+				
+				$stmt->fetch();
+				
+				$stmt->close();	
+				
+				if($flag != 'o') {
+					
+					$query = "UPDATE membership SET flag = 'a'  WHERE user_id = ? AND group_id = ?";
+					$stmt = $this->conn->prepare($query);
+					if(false === $stmt)
+					die("Prepare failed");
+					
+					$ok = $stmt->bind_param("ii", $_POST["user_id"], $_SESSION["group_id"]);
+					if(false === $ok)
+					die("bind_param failed");
+					
+					$ok = $stmt->execute();
+					if(false === $ok)
+					die("Execute failed");
+					
+					$stmt->close();
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		
+		private function makeUser() {
+			if(empty($_POST["user_id"])) {
+				die("Empty name");
+			} elseif(empty($_SESSION["group_id"])) {
+				die("Empty name");
+			} else {
+				if(hasGroupFlag('a') == false)
+					return false;
+					
+				$query = "SELECT flag FROM membership WHERE user_id = ? AND group_id = ?";
+				$stmt = $this->conn->prepare($query);
+				if(false === $stmt)
+				die("Prepare failed");
+				
+				$ok = $stmt->bind_param("ii", $_POST["user_id"], $_SESSION["group_id"]);
+				if(false === $ok)
+				die("bind_param failed");
+				
+				$ok = $stmt->execute();
+				if(false === $ok)
+				die("Execute failed");
+				
+				$ok = $stmt->bind_result($flag);
+				if(false === $ok)
+				die("bind_result failed");
+				
+				$stmt->fetch();
+				
+				$stmt->close();	
+				
+				if($flag != 'o') {
+					
+					$query = "UPDATE membership SET flag = 'u'  WHERE user_id = ? AND group_id = ?";
+					$stmt = $this->conn->prepare($query);
+					if(false === $stmt)
+					die("Prepare failed");
+					
+					$ok = $stmt->bind_param("ii", $_POST["user_id"], $_SESSION["group_id"]);
+					if(false === $ok)
+					die("bind_param failed");
+					
+					$ok = $stmt->execute();
+					if(false === $ok)
+					die("Execute failed");
+					
+					$stmt->close();
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		
 		private function setID()
 		{
 			if(empty($_GET["setid"]))
@@ -289,10 +528,11 @@
 			if(!empty($_SESSION["group_id"])) {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			
-				$query = "SELECT membership.user_id, members.name
-				FROM membership
-				INNER JOIN members ON membership.user_id = members.user_id
-				WHERE group_id = ?;";
+				$query = "SELECT m.user_id, m.name, f.flag 
+						FROM members m 
+						INNER JOIN membership f ON m.user_id = f.user_id
+						WHERE group_id = ? 
+						ORDER BY name";
 				$stmt = $conn->prepare($query);
 				if(false === $stmt)
 				die("Prepare failed");
@@ -305,7 +545,7 @@
 				if(false === $ok)
 				die("Execute failed");
 				
-				$ok = $stmt->bind_result($user_id, $name);
+				$ok = $stmt->bind_result($user_id, $name, $flag);
 				if(false === $ok)
 				die("bind_result failed");
 				
@@ -313,7 +553,8 @@
 				while($stmt->fetch())
 				{
 					$members[] = array ( 'user_id' => $user_id,
-										 'name' => $name );
+										 'name' => $name,
+										 'flag' => $flag);
 				}
 				
 				$stmt->close();
@@ -354,7 +595,7 @@
 				while($stmt->fetch())
 				{
 					$materials[] = array(
-										'file_id' => $file_id,
+					'file_id' => $file_id,
 										'filename' => $filename,
 										'size' => $size,
 										'title' => $title,

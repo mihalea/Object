@@ -59,4 +59,35 @@
 		$bytes /= (1 << (10 * $pow)); 
 		
 		return round($bytes, $precision) . ' ' . $units[$pow]; 
-	} 			
+	} 	
+	
+	function getAllUsers() {
+		if(!empty($_SESSION["id"])) {
+			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+			
+			$query = "SELECT user_id, name FROM members ORDER BY name ASC";
+			$stmt = $conn->prepare($query);
+			if(false === $stmt)
+			die("Prepare failed");
+			
+			$ok = $stmt->execute();
+			if(false === $ok)
+			die("Execute failed");
+			
+			$ok = $stmt->bind_result($user_id, $name);
+			if(false === $ok)
+			die("bind_result failed");
+			
+			$members = array();
+			while($stmt->fetch())
+			{
+				$members[] = array ( 'user_id' => $user_id,
+				'name' => $name );
+			}
+			
+			$stmt->close();
+			$conn->close();
+			
+			return $members;
+		}
+	}	

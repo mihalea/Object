@@ -36,6 +36,8 @@
 .red-pageheader {
 	padding-bottom: 5px;
 	border-bottom: 1px solid #ccc;
+	position: relative;
+	top: -25px;
 }
 
 .fixed-width {
@@ -49,7 +51,7 @@ div.no-margin {
 
 body {
 	background-color: #f2f2f4;
-	padding-top: 50px;
+	padding-top: 75px;
 }
 
 .top-buttons {
@@ -218,7 +220,6 @@ input.bottom{
 
 .tt-dropdown-menu {
   width: 250;
-  margin-top: 12px;
   padding: 8px 0;
   background-color: #fff;
   border: 1px solid #ccc;
@@ -229,6 +230,8 @@ input.bottom{
   -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
      -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
           box-shadow: 0 5px 10px rgba(0,0,0,.2);
+	border-top-right-radius: 0;
+	border-top-left-radius: 0;
 }
 
 .tt-suggestion {
