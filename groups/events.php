@@ -186,6 +186,8 @@
 		<script src="js/moment.js"></script>
 		<script src="js/fullcalendar.min.js"></script>
 		<script src="js/bootstrap-datetimepicker.js"></script>	
+		<script src="js/jquery.autogrowtextarea.min.js"></script>	
+		
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
@@ -208,7 +210,7 @@
 						right: 'prev,next'
 					},
 					//editable: true,
-					events: "<?=SITE_ROOT, "groups/json.php?events"?>",
+					events: "<?=SITE_ROOT, "groups/ajax.php?events"?>",
 					eventLimit: true, 
 					//defaultView: 'agendaWeek',
 					eventColor: '#a6373f',
@@ -266,6 +268,8 @@
 			$('#pickDate').datetimepicker( { pickTime: false });
 			$('#pickStart').datetimepicker( { pickDate: false });
 			$('#pickEnd').datetimepicker( { pickDate: false });
+			
+			$('#comment').autoGrow();
 
 		</script> 
 </body>

@@ -56,6 +56,14 @@ body {
 	top: -8px;
 }
 
+.cursor-hand {
+	cursor:pointer;
+}
+
+.comment-block {
+	padding: 15px;
+}
+
 a.white-link {
 	color: #ecf0f1;	
 	cursor:pointer;

@@ -1190,7 +1190,7 @@ class UploadHandler
 		$stmt->close();
 		
 		$message = "empty";
-		$query = "INSERT INTO g_posts (group_id, user_id, file_id, text, date) 
+		$query = "INSERT INTO posts (group_id, user_id, file_id, text, date) 
 			VALUES (?, ?, LAST_INSERT_ID(), '" . $message . "' , NOW());";
 		$stmt = $conn->prepare($query);
 		if(false === $stmt)

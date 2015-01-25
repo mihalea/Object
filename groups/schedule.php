@@ -140,7 +140,7 @@
 					
 					$('#schedule').fullCalendar({
 						//editable: true,
-						events: "<?=SITE_ROOT, "groups/json.php?schedule"?>",
+						events: "<?=SITE_ROOT, "groups/ajax.php?schedule"?>",
 						eventLimit: true, 
 						defaultView: 'agendaWeek',
 						eventColor: '#a6373f',

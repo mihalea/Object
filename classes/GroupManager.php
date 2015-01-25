@@ -33,7 +33,13 @@
 					} else {
 					header($url . "error=post");
 				}
-			} elseif (isset($_GET["setid"])) {
+			} elseif(isset($_POST["comment"])) {
+				if($this->createComment() == true) {
+					header($url);
+					} else {
+					header($url . "error=comment");
+				}
+			}elseif (isset($_GET["setid"])) {
 				if($this->setID() == true) {
 					header($url);
 					} else {
@@ -102,15 +108,15 @@
 		
 		public function createPost()
 		{
-			if(!isset($_POST["post"]) OR empty($_POST["post"])) {
+			if(empty($_POST["post"])) {
 				$this->errors[] = "Empty post var: text";
-				} elseif(!isset($_SESSION["group_id"]) OR empty($_SESSION["group_id"])) {
+				} elseif(empty($_SESSION["group_id"])) {
 				$this->errors[] = "Group not selected";
-				} elseif(!isset($_SESSION["id"]) OR empty($_SESSION["id"])) {
+				} elseif(empty($_SESSION["id"])) {
 				$this->errors[] = "Empty or not set user id";
 				} else {
 				
-				$stmt = $this->conn->prepare("INSERT INTO g_posts (group_id, user_id, text, date) 
+				$stmt = $this->conn->prepare("INSERT INTO posts (group_id, user_id, text, date) 
 				VALUES(?, ?, ?, NOW());");
 				if(false === $stmt) {
 					$this->errors[] = "Prepare failed " . $conn->error;
@@ -139,6 +145,49 @@
 				
 				return true;
 				
+			}
+			
+			return false;
+		}
+		
+		private function createComment() 
+		{
+			if(empty($_POST["comment"])) {
+				die("Empty text");
+			} elseif (empty($_SESSION["id"])) {
+				die("Empty user id");
+			} elseif (empty($_SESSION["group_id"])) {
+				die("Empty group id");
+			} elseif (empty($_POST["post_id"])) {
+				die("Empty post id");
+			} else {
+			
+				$stmt = $this->conn->prepare("INSERT INTO comments (group_id, post_id, user_id, text, date) 
+				VALUES(?, ?, ?, ?, NOW());");
+				if(false === $stmt) {
+					$this->errors[] = "Prepare failed " . $conn->error;
+					return false;
+				}
+				
+				$group_id = $_SESSION["group_id"];
+				$post_id = $_POST["post_id"];
+				$user_id = $_SESSION["id"];
+				$comment = strip_tags($_POST["comment"]);
+				
+				$ok = $stmt->bind_param("iiis", $group_id, $post_id, $user_id, $comment);
+				if(false === $ok) {
+					$this->errors[] = "bind_param() failed";
+					return false;
+				}
+				
+				$ok = $stmt->execute();
+				if(false === $ok) {
+					$this->errors[] = "execute() failed";
+					return false;
+				}
+				$stmt->close();
+				
+				return true;
 			}
 			
 			return false;
@@ -188,20 +237,23 @@
 			return false;
 		}
 		
-		public static function getPosts() {
+		public static function getPosts($group_id = null) {
 			if(!empty($_SESSION["group_id"])) {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			
-				$query = "SELECT g_posts.user_id, members.name, g_posts.text, g_posts.date, g_posts.file_id, g_posts.event_id
-				FROM g_posts
-				INNER JOIN members ON g_posts.user_id = members.user_id
+				$query = "SELECT posts.post_id, posts.user_id, members.name, posts.text, posts.date, posts.file_id, posts.event_id, c.count
+				FROM posts
+				INNER JOIN members ON posts.user_id = members.user_id
+				LEFT JOIN (SELECT post_id, count(comment_id) as count FROM comments GROUP BY post_id) as c on posts.post_id = c.post_id
 				WHERE group_id = ?
-				ORDER BY g_posts.date DESC;";
+				ORDER BY posts.date DESC;";
 				$stmt = $conn->prepare($query);
 				if(false === $stmt)
 				die("Prepare failed");
 				
-				$ok = $stmt->bind_param("i", $_SESSION["group_id"]);
+				if(empty($group_id))
+					$group_id = $_SESSION["group_id"];
+				$ok = $stmt->bind_param("i", $group_id);
 				if(false === $ok)
 				die("bind_param failed");
 				
@@ -209,7 +261,7 @@
 				if(false === $ok)
 				die("Execute failed");
 				
-				$ok = $stmt->bind_result($user_id, $name, $text, $date, $file_id, $event_id);
+				$ok = $stmt->bind_result($post_id, $user_id, $name, $text, $date, $file_id, $event_id, $count);
 				if(false === $ok)
 				die("bind_result failed");
 				
@@ -217,12 +269,14 @@
 				while($stmt->fetch())
 				{
 					$posts[] = array(
+									'post_id' => $post_id,
 									'user_id' => $user_id,
 									'name' => $name,
 									'text' => $text,
 									'date' => $date,
 									'file_id' => $file_id,
-									'event_id' => $event_id);
+									'event_id' => $event_id,
+									'count' => $count);
 				}
 				
 				$stmt->close();
@@ -321,7 +375,7 @@
 			}
 		}
 		
-		public static function printGroups()
+		public static function getGroups()
 		{		
 				if(!empty($_SESSION["id"])) {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
@@ -340,9 +394,8 @@
 				$code = $stmt->bind_param("i", $user_id);
 				if(false === $code)
 				die("bind_param() failed");
-				
-				
-				$rows = array();			
+							
+				$groups = array();
 				$success = $stmt->execute();
 				if(false === $success)
 				die("execute() failed");
@@ -353,22 +406,20 @@
 					if(false === $success)
 					die("bind_result() failed");
 					
-					echo '<div class="list-group">';
+					
+					
 					while($stmt->fetch())
 					{
-						echo '<a href="groups?setid=' . $group_id . '" class="list-group-item">';
-						echo $name;		
-						
-						if($flag == 'a')
-						echo '<span class="glyphicon glyphicon-tasks pull-right"></span>';				
-						echo '</a>';
-						
+						$groups[] = array( 'name' => $name,
+										   'group_id' => $group_id,
+										   'flag' => $flag );						
 					}
-					echo '</div>';
 				}
 				
 				$stmt->close();
 				$conn->close();
+				
+				return $groups;
 			}
 		}
 		

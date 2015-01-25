@@ -72,7 +72,7 @@
 				$stmt->close();
 				
 				if(!empty($group_id)) {
-					$stmt = $conn->prepare("INSERT INTO g_posts (group_id, user_id, event_id, text, date)
+					$stmt = $conn->prepare("INSERT INTO posts (group_id, user_id, event_id, text, date)
 						VALUES (?, ?, LAST_INSERT_ID(), 'empty', NOW())");
 					if(false === $stmt)
 					die("Failed to prepare at addEvent: " . $conn->connect_error);
@@ -160,7 +160,7 @@
 				if($days != 0)
 					$query = $query . " AND date <= DATE_ADD(NOW(), INTERVAL " . $days . " DAY) AND date >= NOW()";
 				
-				$query = $query . " ORDER BY date DESC";
+				$query = $query . " ORDER BY date ASC";
 				if($limit != 0)
 					$query = $query . " LIMIT " . $limit;
 				

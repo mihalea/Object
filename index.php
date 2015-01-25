@@ -16,6 +16,7 @@
 			
 			require_once("config/db.php");
 			require_once("classes/Login.php");
+			require_once("classes/GroupManager.php");
 			
 			$login = new Login();
 			
