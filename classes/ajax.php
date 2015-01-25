@@ -264,17 +264,11 @@
 	{
 		if(empty($_SESSION["id"]))
 			die("Empty user id");
-		elseif (empty($_SESSION["group_id"]))
-			die("Empty group id");
 		elseif (empty($_GET["post_id"]))
 			die("Empty post id");
 		elseif (!isset($_GET["batch"]))
 			die("Empty batch");
 		else {
-			if(hasGroupFlag('u') == false)
-			http_response_code(403);
-	
-	
 			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			
 			if($conn->connect_errno)
@@ -317,7 +311,9 @@
 			
 			$stmt->close();
 			
-			echo json_encode(array_reverse($comments));
+			if($_GET["batch"] == 0) 
+				$comments = array_reverse($comments);
+			echo json_encode($comments);
 		}
 	}
 	

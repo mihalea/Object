@@ -121,7 +121,7 @@
 			</div>
 			
 			
-			<script src="js/jquery-1.11.2.min.js"></script>
+			<script src="js/jquery-2.1.3.min.js"></script>
 			<!-- Latest compiled and minified JavaScript -->
 			<script src="js/bootstrap.min.js"></script>
 			<script src="js/moment.js"></script>

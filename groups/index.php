@@ -158,7 +158,7 @@
 										<small>
 											<?php
 												$id = $post["post_id"];
-												echo '<span class="toggleComment" value="' . $id . '" count="' . (empty($post["count"]) ? 0 : $post["count"]) . '" target="#comments_'. $id .'" data-toggle="collapse" href="#comment_'. $id .'" aria-expanded="false" aria-controls="comment_' . $id . '">';
+												echo '<span class="toggleComment" value="' . $id . '" count="' . (empty($post["count"]) ? 0 : $post["count"]) . '" target="#comments_'. $id .'" data-toggle="collapse" aria-expanded="false" aria-controls="comment_' . $id . '">';
 												if(empty($post["count"])) 
 												{
 													echo '<span class="text-info cursor-hand">New comment</span>';
@@ -204,14 +204,16 @@
 					</div>
 				</div>
 				
-				<div id="template" style="visibility: hidden;">
-					<strong><span class="text-info">Name</span></strong>&nbsp;
-					<span class="text"></span>
-					<br />
-					<span class="text-muted">Hours ago</span>
-				</div>
+				
 				
 			</div>
+			
+			<div id="template" style="visibility: hidden;">
+				<strong><span class="text-info">Name</span></strong>&nbsp;
+					<span class="text"></span>
+					<br />
+					<small><span class="text-muted">Hours ago</span><small>
+				</div>
 			
 			<div class="modal fade" id="user_modal" tabindex="-1" role="dialog" aria-labelledby="modal_label" aria-hidden="true">
 				<div class="modal-dialog">
@@ -242,7 +244,7 @@
 			<?php } } else { 
 			header('Location: /test/index.php?ref=groups');
 		} ?>
-		<script src="js/jquery-1.11.2.min.js"></script>
+		<script src="js/jquery-2.1.3.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
 		<script src="js/moment.js"></script>
 		<script src="js/jquery.autogrowtextarea.min.js"></script>	
@@ -354,6 +356,8 @@
 						url: "<?=SITE_ROOT?>classes/ajax.php?comments&post_id=" + post_id + "&batch=" + batch
 					})
 					.done(function( data ) {
+						$('#comment_' + post_id).collapse('show');
+					
 						if(data.length == 0) {
 							parent.attr("batch", "-1");
 							parent.attr("style", "visibility: hidden;");
@@ -367,8 +371,9 @@
 							comm.find('span.text').text(comment.text);
 							comm.find('span.text-muted').text(comment.ago);
 							
-							if(batch == 0)
+							if(batch == 0) {
 							target.append(comm);
+							}
 							else
 							target.prepend(comm);
 						});

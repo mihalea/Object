@@ -31,8 +31,8 @@
 				<li <?php if (preg_match('/test\/events/', $page)) echo ' class="active"'?>>
 					<a href=<?=SITE_ROOT, "events"?>>Events</a>
 				</li>
-				<li <?php if (preg_match('/test\/grades/', $page)) echo ' class="active"'?>>
-					<a href=<?=SITE_ROOT, "grades"?>>Grades</a>
+				<!--<li <?php if (preg_match('/test\/grades/', $page)) echo ' class="active"'?>>
+					<a href=<?=SITE_ROOT, "grades"?>>Grades</a>-->
 				</li>
 			</ul>
 			

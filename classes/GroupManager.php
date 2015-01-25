@@ -33,7 +33,7 @@
 				}
 			} elseif(isset($_POST["comment"])) {
 				if($this->createComment() == true) {
-					header($url);
+					#header($url);
 					} else {
 					header($url . "?error=comment");
 				}

@@ -27,7 +27,7 @@
 		<?php } else {
 			header('Location: /test/index.php?ref=groups');
 		} ?>
-		<script src="js/jquery-1.11.2.min.js"></script>
+		<script src="js/jquery-2.1.3.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
 	</body>
 </html>
