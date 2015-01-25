@@ -288,6 +288,9 @@
 					parent.attr("href", "");
 					if(count > 10) {
 						parent.children('span').text("View previous comments");
+					} else if (count < 10) {
+						parent.attr("batch", "-1");
+						parent.attr("style", "visibility: hidden;");
 					}
 				});
 			});

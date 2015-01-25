@@ -19,6 +19,7 @@
 			require_once("../config/db.php");
 			require_once("../classes/Login.php");
 			require_once("../classes/EventManager.php");
+			require_once("../classes/Permissions.php");
 			
 			$login = new Login();
 			$event = new EventManager();
@@ -170,6 +171,8 @@
 											</div>
 										</div>
 									</form>
+									<br />
+									<span id="d_remove" class="btn btn-danger fixed-width center-block cursor-hand">Remove</span>
 								</div>
 							</div>
 						</div>
@@ -177,6 +180,12 @@
 				</div>
 			</div>
 		</div>
+		
+		<form method="post" id="removeForm">
+			<input type="hidden" id="hidden_id" name="event_id" />
+			<input type="hidden" name="remove"/>
+			<input type="hidden" name="group" />
+		</form>
 		
 		<?php } else {
 			header('Location: index.php?ref=groups');
@@ -226,41 +235,25 @@
 						if(!isLoading) {
 							var events = $("#calendar").fullCalendar('clientEvents', <?=$_GET["event_id"]?>);
 							$.each(events, function (index, e) {
-									$('#panel_details').show();
-								$('#collapseAdd').collapse('hide');
-								$('#collapseDetails').collapse('show');
-								
-								$('#d_name').val(e["title"]);
-								$('#d_location').val(e["location"]);
-								$('#d_date').val(e["date"]);
-								$('#d_start').val(e["start"]);
-								$('#d_end').val(e["end"]);
-								$('#d_comment').val(e["comment"]);
+								setDetails(e);
 							});
-							
-							
 						}
 					
 					<?php } ?>
 						
 					},
 					eventClick: function(callEvent, jsEvent, view) {				
-						$('#panel_details').show();
-						$('#collapseAdd').collapse('hide');
-						$('#collapseDetails').collapse('show');
-						
-						$('#d_name').val(callEvent["title"]);
-						$('#d_location').val(callEvent["location"]);
-						$('#d_date').val(callEvent["date"]);
-						$('#d_start').val(callEvent["start"]);
-						$('#d_end').val(callEvent["end"]);
-						$('#d_comment').val(callEvent["comment"]);
+						setDetails(callEvent);
 					}
 				})
 			});
 			
 			$('#addHeading').click(function() {
 				$('#panel_details').hide();
+			});
+			
+			$('#d_remove').click(function() {
+				$('#removeForm').submit();
 			});
 			
 			$('#panel_details').hide();
@@ -270,6 +263,25 @@
 			$('#pickEnd').datetimepicker( { pickDate: false });
 			
 			$('#comment').autoGrow();
+			
+			var setDetails = function (event) {
+				$('#panel_details').show();
+					$('#collapseAdd').collapse('hide');
+					$('#collapseDetails').collapse('show');
+					
+					$('#d_name').val(event["title"]);
+					$('#d_location').val(event["location"]);
+					$('#d_date').val(event["date"]);
+					$('#d_start').val(event["start"]);
+					$('#d_end').val(event["end"]);
+					$('#d_comment').val(event["comment"]);
+					$('#hidden_id').val(event["id"]);
+					
+					if(event["can_delete"] == true)
+						$('#d_remove').show();
+					else
+						$('#d_remove').hide();
+			};
 
 		</script> 
 </body>

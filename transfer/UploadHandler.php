@@ -12,6 +12,7 @@
 
 
 require_once("../config/db.php");
+require_once("../classes/Helper.php");
  
 class UploadHandler
 {
@@ -1158,8 +1159,11 @@ class UploadHandler
 		if(false === $stmt)
 		die("Prepare failed");
 		
-		$ok = $stmt->bind_param("ssiiisiis", $unique, $original, $size, $_SESSION["group_id"], $_SESSION["id"], $_POST["title"],
-										$_POST["subject"], $author_id, $_POST["comment"]);
+		$title = strip_tags($_POST["title"]);
+		$comment = strip_tags($_POST["comment"]);
+		
+		$ok = $stmt->bind_param("ssiiisiis", $unique, $original, $size, $_SESSION["group_id"], $_SESSION["id"], $title,
+										$_POST["subject"], $author_id, $comment);
 		if(false === $ok)
 		die("bind_param failed");
 		
@@ -1189,7 +1193,8 @@ class UploadHandler
 		$stmt->fetch();
 		$stmt->close();
 		
-		$message = "empty";
+		$message = '<span class="text-info">Title: </span>' . $title.'<br />
+					<span class="text-info">Size: </span>' . formatBytes($size) .'<br />';
 		$query = "INSERT INTO posts (group_id, user_id, file_id, text, date) 
 			VALUES (?, ?, LAST_INSERT_ID(), '" . $message . "' , NOW());";
 		$stmt = $conn->prepare($query);

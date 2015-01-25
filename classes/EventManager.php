@@ -9,7 +9,7 @@
 		
 		public function __construct()
 		{
-			$url = SITE_ROOT . isset($_POST["group"]) ? "groups/events.php" : "events";
+			$url = SITE_ROOT . (isset($_POST["group"]) ? "groups/events.php" : "events");
 			if(isset($_POST["event"])) {			
 				if($this->addEvent() == true) {
 					header('Location: ' . $url);
@@ -18,12 +18,12 @@
 					header('Location: ' . $url . '?error=add');
 				}
 			}
-			elseif(isset($_POST["eventID"])) {
+			elseif(isset($_POST["remove"])) {
 				if($this->removeEvent() == true) {
 					header('Location: ' . $url);
 				}
 				else {
-					header('Location: ' . $url . 'error=rem');
+					header('Location: ' . $url . '?error=rem');
 				}
 			}
 		}
@@ -52,7 +52,7 @@
 				if(false === $stmt)
 				die("Failed to prepare at addEvent: " . $conn->connect_error);
 				
-				$group_id = empty($_POST["group"]) ? $_SESSION["group_id"] : null;
+				$group_id = isset($_POST["group"]) ? $_SESSION["group_id"] : null;
 				$user_id = $_SESSION["id"];
 				$name = strip_tags($_POST["name"]);
 				$location = !empty($_POST["location"]) ? strip_tags($_POST["location"]) : null;
@@ -60,6 +60,9 @@
 				$start = !empty($_POST["start"]) ? date('H:i', strtotime($_POST["start"])) : null;
 				$end = !empty($_POST["end"]) ? date('H:i', strtotime($_POST["end"])) : null;
 				$comment = !empty($_POST["comment"]) ? strip_tags($_POST["comment"]) : null;
+				
+				if(!empty($_POST["group"]))
+					$name = "WHY THE FUCK";
 				
 				$code = $stmt->bind_param("iissssss", $group_id, $user_id, $name, $location, $date, $start, $end, $comment);
 				if(false === $code)
@@ -72,8 +75,10 @@
 				$stmt->close();
 				
 				if(!empty($group_id)) {
+					$message = '<span class="text-info">Title: </span>' . $name.'<br />
+								<span class="text-info">Date: </span>' . date('Y-m-d', strtotime($date)) .'<br />';
 					$stmt = $conn->prepare("INSERT INTO posts (group_id, user_id, event_id, text, date)
-						VALUES (?, ?, LAST_INSERT_ID(), 'empty', NOW())");
+						VALUES (?, ?, LAST_INSERT_ID(), '" . $message . "', NOW())");
 					if(false === $stmt)
 					die("Failed to prepare at addEvent: " . $conn->connect_error);
 					
@@ -98,7 +103,7 @@
 		
 		public function removeEvent()
 		{
-			if(empty($_POST["eventID"])) {
+			if(empty($_POST["event_id"])) {
 				$errors="Empty event id";
 			}
 			else
@@ -115,17 +120,27 @@
 					return false;
 				}
 				
-				$id = $_POST["eventID"];
+				$isAdmin = hasGroupFlag('a');
 				
-				$stmt = $conn->prepare("DELETE FROM events
-				WHERE event_id = ?;");
+				if($isAdmin)
+					$stmt = $conn->prepare("DELETE FROM events WHERE event_id = ?;");
+				elseif(hasGroupFlag('u'))
+					$stmt = $conn->prepare("DELETE FROM events WHERE event_id = ? AND user_id = ?;");
+				else
+					die('No permissions');
 				
 				if(false === $stmt) {
 					$this->errors[] = "Failed to prepare at removeEvent";
+					
 					return false;
 				}
+				$id = $_POST["event_id"];
 				
-				$code = $stmt->bind_param("i", $id);
+				if($isAdmin)
+					$code = $stmt->bind_param("i", $id);
+				else
+					$code = $stmt->bind_param("ii", $id, $_SESSION["id"]);
+				
 				if(false === $code) {
 					$this->errors[] = "Failed to bind parms at removeEvent";
 					return false;
@@ -146,7 +161,7 @@
 			return false;
 		}
 		
-		public  static function getEvents($days = 0, $limit = 0) {
+		public  static function getEvents($group = true, $days = 0, $limit = 0) {
 			if(isset($_SESSION["id"]) AND !empty($_SESSION["id"]) AND 
 			isset($_SESSION["group_id"]) AND !empty($_SESSION["group_id"])) {
 				$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
@@ -207,96 +222,14 @@
 					'date' => $date,
 					'start' => $start,
 					'end' => $end,
-					'comment' => $comment);
+					'comment' => $comment,
+					'can_delete' => ($user_id == $_SESSION["id"] OR hasGroupFlag('a') ? true : false));
 				}
 				
 				return $events;
 			}
 			
 			return null;
-		}
-		
-		public function printEvent()
-		{
-			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-			
-			if($conn->connect_errno) {
-				$this->errors[] = "Failed to connect to database at getEvents";
-				return false;
-			}
-			
-			$user_id = $_SESSION["id"];
-			
-			$query = "SELECT name, date, comment, event_id
-			FROM events
-			WHERE user_id = ?";
-			
-			if(empty($_POST["group"])) {
-				$query = $query . " AND group_id IS NULL";
-			}
-			if(!isset($_GET["all"])) {
-				$query = $query . " AND date >= curdate()";
-			}
-			
-			$query = $query . " ORDER BY date";
-			
-			$stmt = $conn->prepare($query);
-			
-			if(false === $stmt) {
-				$this->errors[] = "Failed to prepare at getEvents";
-				return false;
-			}
-			
-			$ok = $stmt->bind_param("i", $user_id);
-			if(false === $ok) {
-				$this->errors[] = "Failed to prepare at getEvents";
-				return false;
-			}
-			
-			
-			$ok = $stmt->execute();
-			if(false === $ok) {
-				$this->errors[] = "Failed to get results at getEvents";
-				return false;
-			}
-			
-			$ok = $stmt->bind_result($name, $date, $comment, $event_id);
-			
-			if(false === $ok) {
-				$this->errors[] = "Failed to bind results at getEvents";
-				return false;
-			}
-			
-			$stmt->store_result();
-			$rows = $stmt->num_rows;
-			
-			if($rows == 0) {
-				echo '<div class="alert alert-info"><p>Heads up! There are no events to be shown.</p></div>';
-			}
-			else {
-				echo '<table class="table" id="eventTable">
-				<tr><th>Name</th> <th>Date</th> <th>Comment</th> <th style="width:50px"></th> </tr>';
-				while($stmt->fetch())
-				{
-					echo "<tr>";
-					
-					echo "<td>" . $name . "</td>";
-					echo "<td>" . $date . "</td>";
-					echo "<td>" . $comment . "</td>";
-					
-					echo '<td class="removeCol"><span class="glyphicon glyphicon-remove" onclick="removeEvent(' . $event_id . ')"></span></td>';
-					
-					echo "</tr>";
-				}
-				
-				echo '</table>';
-			}
-			
-			
-			$stmt->close();
-			$conn->close();
-			
-			return true;
 		}
 	}
 ?>

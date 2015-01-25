@@ -5,22 +5,162 @@
 	require_once("../classes/Helper.php");
 	require_once("../classes/EventManager.php");
 	
-	if(isset($_GET["schedule"])) 
-	{
+	
+	
+	if(isset($_GET["schedule"])) {
 		getSchedule();
-	} 
-	elseif (isset($_GET["events"])) 
-	{
+	} elseif (isset($_GET["events"])) {
 		getEvents();
-	}
-	elseif (isset($_GET["comments"]))
-	{
+	} elseif (isset($_GET["comments"])){
 		getComments();
+	} elseif (isset($_GET["personal"])) {
+		getPersonalEvents();
 	}
 	
+	
+	
 	function getEvents()
-	{		
+	{	
 		echo json_encode(EventManager::getEvents());
+	}
+	
+	function getPersonalEvents() {
+		if(empty($_SESSION["id"]))
+			die("Empty user id");
+		elseif (empty($_SESSION["group_id"]))
+			die("Empty group id");
+		else {
+			$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+			
+			if($conn->connect_errno)
+			die("Failed to connect to database");
+
+			$query = "SELECT event_id, name, location, date, start, end, comment
+			FROM events
+			WHERE user_id = ? AND group_id IS NULL";
+			$stmt = $conn->prepare($query);
+			if(false === $stmt)
+			die("Prepare failed");
+			
+			$ok = $stmt->bind_param("i", $_SESSION["id"]);
+			if(false === $ok)
+			die("bind_param failed");
+			
+			$ok = $stmt->execute();
+			if(false === $ok)
+			die("Execute failed");
+			
+			$ok = $stmt->bind_result($event_id, $name, $location, $date, $start, $end, $comment);
+			if(false === $ok)
+			die("bind_result failed");
+			
+			$events = array();
+			while($stmt->fetch())
+			{
+				if(!empty($start)) {
+					$exp = explode(":", $start);
+					$ep_start = strtotime($date)+ $exp[0]*60*60 + $exp[1]*60;
+					$start = date("Y-m-d H:i", $ep_start);
+				}
+				
+				if(!empty($end)) {
+					$exp = explode(':', $end);
+					$ep_end   = strtotime($date) + $exp[0]*60*60 + $exp[1]*60;				
+					$end = date("Y-m-d H:i", $ep_end);
+				}
+				
+				
+				$events[] = array(
+				'id' => $event_id,
+				'title' => $name,
+				'location' => $location,
+				'date' => $date,
+				'start' => $start,
+				'end' => $end,
+				'comment' => $comment,
+				'can_delete' => true);
+			}
+			
+			$stmt->close();
+			
+			$query = "SELECT group_id FROM membership where user_id = ?";
+			$stmt = $conn->prepare($query);
+			if(false === $stmt)
+			die("Prepare failed");
+			
+			$ok = $stmt->bind_param("i", $_SESSION["id"]);
+			if(false === $ok)
+			die("bind_param failed");
+			
+			$ok = $stmt->execute();
+			if(false === $ok)
+			die("Execute failed");
+			
+			$ok = $stmt->bind_result($group_id);
+			if(false === $ok)
+			die("bind_result failed");
+			
+			$groups = array();
+			while($stmt->fetch()) {
+				$groups[] = $group_id;
+			}
+			
+			$stmt->close();
+			
+			foreach($groups as $g) {
+				$query = "SELECT event_id, user_id, name, location, date, start, end, comment
+				FROM events
+				WHERE group_id = ?";
+				$stmt = $conn->prepare($query);
+				if(false === $stmt)
+				die("Prepare failed");
+				
+				$ok = $stmt->bind_param("i", $g);
+				if(false === $ok)
+				die("bind_param failed");
+				
+				$ok = $stmt->execute();
+				if(false === $ok)
+				die("Execute failed");
+				
+				$ok = $stmt->bind_result($event_id, $user_id, $name, $location, $date, $start, $end, $comment);
+				if(false === $ok)
+				die("bind_result failed");
+				
+				while($stmt->fetch())
+				{
+					if(!empty($start)) {
+						$exp = explode(":", $start);
+						$ep_start = strtotime($date)+ $exp[0]*60*60 + $exp[1]*60;
+						$start = date("Y-m-d H:i", $ep_start);
+					}
+					
+					if(!empty($end)) {
+						$exp = explode(':', $end);
+						$ep_end   = strtotime($date) + $exp[0]*60*60 + $exp[1]*60;				
+						$end = date("Y-m-d H:i", $ep_end);
+					}
+					
+					
+					$events[] = array(
+					'id' => $event_id,
+					'title' => $name,
+					'location' => $location,
+					'date' => $date,
+					'start' => $start,
+					'end' => $end,
+					'comment' => $comment,
+					'backgroundColor' => '#373fa6',
+					'borderColor' => '#161942',
+					'can_delete' => ($user_id == $_SESSION["id"] OR hasGroupFlag('a', $g) ? true : false));
+				}
+				
+				$stmt->close();
+			}
+			
+			echo json_encode($events);
+
+		}
 	}
 	
 	function getSchedule()
