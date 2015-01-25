@@ -44,18 +44,19 @@
 							<div class="panel-heading red-heading">
 								<h5><span class="glyphicon glyphicon-user"></span>&nbsp;
 									<?php
-										echo $post["name"];
+										$title = $post["name"];
 										if(!empty($post["file_id"])) {
-											echo ' uploaded a file';
+											$title = $title.' uploaded a file';
 											echo '<div class="pull-right top-buttons">
 											<a href="groups/materials.php?file_id=' . $post["file_id"] . '" class="btn btn-default fixed-width"><i class="fa fa-file"></i>&nbsp;View file</a>
 											</div>';
 											} elseif(!empty($post["event_id"])) {
-											echo ' created a new event';
+											$title = $title.' created a new event';
 											echo '<div class="pull-right top-buttons">
 											<a href="groups/events.php?event_id=' . $post["event_id"] . '" class="btn btn-default fixed-width"><i class="fa fa-calendar"></i>&nbsp;View event</a>
 											</div>';
 										}
+										echo $title . " on " . $post["group_name"];
 										
 									?>
 									<!--<div class="pull-right">
@@ -112,7 +113,7 @@
 					}
 				?>
 				
-				<div id="template">
+				<div id="template" style="visibility: hidden;">
 					<strong><span class="text-info">Name</span></strong>&nbsp;
 					<span class="text"></span>
 					<br />
