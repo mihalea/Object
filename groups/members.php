@@ -21,6 +21,7 @@
 			require_once("../classes/Login.php");
 			require_once("../classes/GroupManager.php");
 			require_once("../classes/Helper.php");
+			require_once("../classes/Permissions.php");
 			
 			$login = new Login();
 			$group = new GroupManager();

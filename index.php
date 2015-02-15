@@ -6,6 +6,7 @@
 		
 		<?php $path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/"; require_once($path . "config/site.php"); echo '<base href="' . SITE_ROOT . '/">'; ?>	
 		
+		<link href="css/font-awesome.min.css" rel="stylesheet">
 		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 		<title> Object </title>
@@ -101,6 +102,8 @@
 											</div>
 											
 											<input type="hidden" name="post_id" value="<?=$id?>" />
+											<input type="hidden" name="group_id" value="<?=$post["group_id"]?>" />
+											
 											<input type="submit" name="comment" value="Comment" class="btn btn-success pull-right" />
 										</form>
 									</div>

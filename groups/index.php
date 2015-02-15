@@ -22,8 +22,10 @@
 			require_once("../config/db.php");
 			require_once("../classes/Login.php");
 			require_once("../classes/GroupManager.php");
+			require_once("../classes/Permissions.php");
 			require_once("../classes/EventManager.php");
 			require_once("../classes/Helper.php");
+			
 			
 			$login = new Login();
 			$manager = new GroupManager();
@@ -210,7 +212,7 @@
 			
 			<div id="template" style="visibility: hidden;">
 				<strong><span class="text-info">Name</span></strong>&nbsp;
-					<span class="text"></span>
+					<div class="text"></div>
 					<br />
 					<small><span class="text-muted">Hours ago</span><small>
 				</div>
@@ -368,7 +370,7 @@
 							var comm = $('#template').clone();
 							comm.attr('style', 'margin-bottom: 5px');
 							comm.find('span.text-info').text(comment.name);
-							comm.find('span.text').text(comment.text);
+							comm.find('div.text').html(comment.text);
 							comm.find('span.text-muted').text(comment.ago);
 							
 							if(batch == 0) {

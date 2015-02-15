@@ -2,7 +2,7 @@
 	$path = realpath($_SERVER["DOCUMENT_ROOT"] . "/test/") . "/";
 	
 	require_once($path . "config/site.php");
-	require_once($path . "classes/Permissions.php");
+	require_once($path . "classes/Helper.php");
 	
 	class GroupManager {
 		
@@ -33,7 +33,7 @@
 				}
 			} elseif(isset($_POST["comment"])) {
 				if($this->createComment() == true) {
-					#header($url);
+					header($url);
 					} else {
 					header($url . "?error=comment");
 				}
@@ -100,7 +100,7 @@
 				}
 				$stmt->close();
 				
-				$stmt = $conn->prepare("INSERT INTO membership (user_id, group_id, flag)
+				$stmt = $this->conn->prepare("INSERT INTO membership (user_id, group_id, flag)
 				VALUES (?, LAST_INSERT_ID(), ?);");
 				if(false === $stmt) {
 					$this->errors[] = "Failed to connect to db: " . $conn->connect_error;
@@ -150,8 +150,7 @@
 				
 				$group_id = $_SESSION["group_id"];
 				$user_id = $_SESSION["id"];
-				$text = $string;
-				
+				$text = make_links_clickable($stripped);
 				$ok = $stmt->bind_param("iis", $group_id, $user_id, $text);
 				if(false === $ok) {
 					$this->errors[] = "bind_param() failed";
@@ -178,8 +177,6 @@
 				die("Empty text");
 			} elseif (empty($_SESSION["id"])) {
 				die("Empty user id");
-			} elseif (empty($_SESSION["group_id"])) {
-				die("Empty group id");
 			} elseif (empty($_POST["post_id"])) {
 				die("Empty post id");
 			} else {
@@ -191,10 +188,10 @@
 					return false;
 				}
 				
-				$group_id = $_SESSION["group_id"];
+				$group_id = !empty($_POST["group_id"]) ? $_POST["group_id"] : $_SESSION["group_id"];
 				$post_id = $_POST["post_id"];
 				$user_id = $_SESSION["id"];
-				$comment = strip_tags($_POST["text"]);
+				$comment = make_links_clickable(strip_tags($_POST["text"]));
 				
 				$ok = $stmt->bind_param("iiis", $group_id, $post_id, $user_id, $comment);
 				if(false === $ok) {

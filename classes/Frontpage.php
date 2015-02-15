@@ -12,7 +12,8 @@
 			INNER JOIN members u ON u.user_id = p.user_id
 			INNER JOIN groups g ON p.group_id = g.group_id
 			LEFT JOIN (SELECT post_id, count(comment_id) as count FROM comments GROUP BY post_id) as c on p.post_id = c.post_id
-			WHERE m.user_id = ?";
+			WHERE m.user_id = ?
+			ORDER BY p.date DESC";
 			$stmt = $conn->prepare($query);
 			if(false === $stmt)
 			die("Prepare failed");
